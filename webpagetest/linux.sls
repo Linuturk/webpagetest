@@ -19,7 +19,13 @@ ffmpeg:
     - name: ffmpeg
     - refresh: True
 
+webpagetest-apache-modules:
+  apache_module.enable:
+    - name:
+      - expires
+      - headers
+      - rewrite
+
 # Configure Virtual Host
-# Enable Apache Mods
 # Pull Webpagetest tarball
 # Extract to Docroot
