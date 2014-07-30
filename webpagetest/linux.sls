@@ -7,6 +7,10 @@ webpagetest-packages:
       - libimage-exiftool-perl
       - libjpeg-turbo-progs
       - python-software-properties
+      - php5-curl
+      - php5-gd
+      - php5-sqlite
+      - php5-apcu
 
 ffmpeg:
   pkgrepo.managed:
