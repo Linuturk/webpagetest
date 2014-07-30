@@ -26,6 +26,25 @@ webpagetest-apache-modules:
       - headers
       - rewrite
 
+/etc/apache2/sites-enabled/webpagetest.rax.io.conf:
+  apache.configfile:
+    - config:
+      - VirtualHost:
+        this: '*:80'
+        ServerName:
+          - webpagetest.rax.io
+        ErrorLog: logs/webpagetest.rax.io-error_log
+        DocumentRoot: /var/www/vhosts/webpagetest.rax.io
+        Directory:
+          this: /var/www/vhosts/webpagetest.rax.io
+          Order: Allow,Deny
+          Allow from: All
+          AllowOverride: All
+  service.running:
+    - name: apache2
+      watch:
+        - file: /etc/apache2/sites-enabled/webpagetest.rax.io.conf
+
 # Configure Virtual Host
 # Pull Webpagetest tarball
 # Extract to Docroot
