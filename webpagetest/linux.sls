@@ -26,7 +26,14 @@ webpagetest-apache-modules:
       - headers
       - rewrite
 
+/etc/apache2/sites-enabled/000-default.conf:
+  file.absent
+
 /etc/apache2/sites-enabled/webpagetest.rax.io.conf:
+  file.symlink:
+    - target: ../sites-available/webpagetest.rax.io.conf
+
+/etc/apache2/sites-available/webpagetest.rax.io.conf:
   apache.configfile:
     - config:
       - VirtualHost:
