@@ -45,7 +45,7 @@ ffmpeg:
   service.running:
     - name: apache2
       watch:
-        - file: /etc/apache2/sites-enabled/webpagetest.rax.io.conf
+        - file: /etc/apache2/sites-available/webpagetest.rax.io.conf
 
 /var/www/vhosts/webpagetest.rax.io:
   archive.extracted:
