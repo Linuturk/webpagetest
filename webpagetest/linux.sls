@@ -34,19 +34,8 @@ webpagetest-apache-modules:
     - target: ../sites-available/webpagetest.rax.io.conf
 
 /etc/apache2/sites-available/webpagetest.rax.io.conf:
-  apache.configfile:
-    - config:
-      - VirtualHost:
-        this: '*:80'
-        ServerName:
-          - webpagetest.rax.io
-        ErrorLog: logs/webpagetest.rax.io-error_log
-        DocumentRoot: /var/www/vhosts/webpagetest.rax.io
-        Directory:
-          this: /var/www/vhosts/webpagetest.rax.io
-          Order: Allow,Deny
-          Allow from: All
-          AllowOverride: All
+  file.managed:
+    - source: salt://files/webpagetest.rax.io.conf
   service.running:
     - name: apache2
       watch:
