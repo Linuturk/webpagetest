@@ -66,6 +66,6 @@ ffmpeg:
       - group
       - mode
 
-/var/www/vhosts/webpagetest.rax.io/www/.htaccess:
+/etc/php5/apache2/php.ini:
   file.managed:
-    - source: salt://webpagetest/files/webpagetest.htaccess
+    - source: salt://webpagetest/files/webpagetest.php.ini
