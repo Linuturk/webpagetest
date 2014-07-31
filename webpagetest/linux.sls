@@ -46,7 +46,7 @@ ffmpeg:
     - name: apache2
       watch:
         - file: /etc/apache2/sites-available/webpagetest.rax.io.conf
-        - file: /etc/php5/mods-available/webpagetest.ini
+        - file: /etc/php5/apache2/php.ini
 
 /var/www/vhosts/webpagetest.rax.io:
   archive.extracted:
