@@ -19,12 +19,17 @@ ffmpeg:
     - name: ffmpeg
     - refresh: True
 
-webpagetest-apache-modules:
-  apache_module.enable:
-    - name:
-      - expires
-      - headers
-      - rewrite
+/etc/apache2/mods-enabled/expires.load:
+  file.symlink:
+    - target: ../mods-available/expires.load
+
+/etc/apache2/mods-enabled/headers.load:
+  file.symlink:
+    - target: ../mods-available/headers.load
+
+/etc/apache2/mods-enabled/rewrite.load:
+  file.symlink:
+    - target: ../mods-available/rewrite.load
 
 /etc/apache2/sites-enabled/000-default.conf:
   file.absent
