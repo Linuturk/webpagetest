@@ -35,7 +35,7 @@ webpagetest-apache-modules:
 
 /etc/apache2/sites-available/webpagetest.rax.io.conf:
   file.managed:
-    - source: salt://files/webpagetest.rax.io.conf
+    - source: salt://webpagetest/files/webpagetest.rax.io.conf
   service.running:
     - name: apache2
       watch:
