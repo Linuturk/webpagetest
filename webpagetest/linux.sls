@@ -11,6 +11,7 @@ webpagetest-packages:
       - php5-gd
       - php5-sqlite
       - php5-apcu
+      - unzip
 
 ffmpeg:
   pkgrepo.managed:
