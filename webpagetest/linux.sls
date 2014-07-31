@@ -64,3 +64,11 @@ ffmpeg:
       - user
       - group
       - mode
+
+/etc/php5/mods-available/webpagetest.ini:
+  file.managed:
+    - source: salt://webpagetest/files/webpagetest.ini
+
+/etc/php5/apache2/conf.d/30-webpagetest.ini:
+  file.symlink:
+    - target: ../../mods-available/webpagetest.ini
