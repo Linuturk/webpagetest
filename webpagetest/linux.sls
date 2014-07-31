@@ -46,6 +46,20 @@ ffmpeg:
       watch:
         - file: /etc/apache2/sites-enabled/webpagetest.rax.io.conf
 
-# Configure Virtual Host
-# Pull Webpagetest tarball
-# Extract to Docroot
+/var/www/vhosts/webpagetest.rax.io:
+  archive.extracted:
+    - source: https://github.com/WPO-Foundation/webpagetest/releases/download/WebPagetest-2.15/webpagetest_2.15.zip
+    - source_hash: sha256=19ee9df78205f99153c6fa80b6e6e98394cc680c4a9e13b31bf4c7a9e374bad8
+    - archive_format: zip
+    - if_missing: /var/www/vhosts/webpagetest.rax.io/www
+
+/var/www/vhosts/webpagetest.rax.io/www:
+  file.directory:
+    - user: www-data
+    - group: www-data
+    - file_mode: 644
+    - dir_mode: 755
+    - recurse:
+      - user
+      - group
+      - mode
