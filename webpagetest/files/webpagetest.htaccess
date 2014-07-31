@@ -1,4 +1,0 @@
-# php configuration tweaks for webpagetest
-php_value upload_max_filesize 12MB
-php_value post_max_size 12MB
-php_value memory_limt 512MB
