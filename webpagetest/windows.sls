@@ -18,11 +18,6 @@ disable-uac:
     - source: salt://webpagetest/powershell/Set-DisableUAC.ps1
     - shell: powershell
 
-install-desktop-experience:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-InstallDesktopExperience.ps1
-    - shell: powershell
-
 set-auto-logon:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-AutoLogon.ps1
