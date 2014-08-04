@@ -309,3 +309,5 @@ process {
         http://msdn.microsoft.com/en-us/library/aa378750
  
 #>
+
+Set-SecureAutoLogon -Username Administrator
