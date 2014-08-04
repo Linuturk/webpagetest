@@ -1,1 +1,1 @@
-start-process -wait bcdedit -ArgumentList "/set {default}, useplatformclock true"
+Start-Process -wait bcdedit -ArgumentList "/set {default}, useplatformclock true"
