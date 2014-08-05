@@ -15,4 +15,5 @@ httpservices:
       - {{ pillar['webpagetest']['http'] }}
       - {{ pillar['webpagetest']['php'] }}
 
-include: {{ pillar['webpagetest']['http'] }}
+include:
+  - {{ pillar['webpagetest']['http'] }}
