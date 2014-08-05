@@ -1,20 +1,21 @@
 webpagetest:
-  - sitename: "webpagetest.example.com"
-  - zipurl: "https://github.com/WPO-Foundation/webpagetest/releases/download/WebPagetest-2.15/webpagetest_2.15.zip"
-  - zipsha: "sha256=19ee9df78205f99153c6fa80b6e6e98394cc680c4a9e13b31bf4c7a9e374bad8"
-  - http: "apache2"
-  - php: "php5"
-  - packages:
-    - imagemagick
-    - libimage-exiftool-perl
-    - libjpeg-turbo-progs
-    - php5-curl
-    - php5-gd
-    - php5-sqlite
-    - php5-apcu
-    - python-software-properties
-    - unzip
-  - phpvars:
-    - upload_max_filesize: "12M"
-    - post_max_size: "12M"
-    - memory_limt: "512M"
+  sitename: "webpagetest.example.com"
+  zipurl: "https://github.com/WPO-Foundation/webpagetest/releases/download/WebPagetest-2.15/webpagetest_2.15.zip"
+  zipsha: "sha256=19ee9df78205f99153c6fa80b6e6e98394cc680c4a9e13b31bf4c7a9e374bad8"
+  http: "apache2"
+  php: "php5"
+  packages:
+  - imagemagick
+  - libimage-exiftool-perl
+  - libjpeg-turbo-progs
+  - php5-curl
+  - php5-gd
+  - php5-sqlite
+  - php5-apcu
+  - python-software-properties
+  - unzip
+  phpvars:
+  - upload_max_filesize: "12M"
+  - post_max_size: "12M"
+  - memory_limt: "512M"
+  - fpm: "unix:/var/run/php5-fpm.sock"
