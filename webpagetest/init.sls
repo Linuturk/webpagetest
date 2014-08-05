@@ -1,4 +1,4 @@
-webpagetest-packages:
+packages:
   pkg.installed:
     - pkgs: {{ pillar['webpagetest']['packages'] }}
 
@@ -15,5 +15,5 @@ httpservices:
       - {{ pillar['webpagetest']['http'] }}
       - {{ pillar['webpagetest']['php'] }}
 
-include:
-  - {{ pillar['webpagetest']['http'] }}
+#include:
+#  - {{ pillar['webpagetest']['http'] }}
