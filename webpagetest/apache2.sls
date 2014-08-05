@@ -27,25 +27,7 @@
         - file: /etc/apache2/sites-available/{{ pillar['webpagetest']['sitename'] }}.conf
         - file: /etc/php5/apache2/php.ini
 
-/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}:
-  archive.extracted:
-    - source: pillar['webpagetest']['zipurl']
-    - source_hash: pillar['webpagetest']['zipsha']
-    - archive_format: zip
-    - if_missing: /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www
-
-/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www:
-  file.directory:
-    - user: www-data
-    - group: www-data
-    - file_mode: 644
-    - dir_mode: 755
-    - recurse:
-      - user
-      - group
-      - mode
-
 /etc/php5/apache2/php.ini:
   file.managed:
-    - source: salt://webpagetest/files/apache.php.ini
+    - source: salt://webpagetest/files/php.ini
     - template: jinja
