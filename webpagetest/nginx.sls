@@ -17,6 +17,13 @@ remove-apache2:
     - name: nginx
     - watch:
         - file: /etc/nginx/sites-available/{{ pillar['webpagetest']['sitename'] }}.conf
+        - file: /etc/nginx/include/{{ pillar['webpagetest']['sitename'] }}.include.conf
+
+/etc/nginx/include/{{ pillar['webpagetest']['sitename'] }}.include.conf:
+  file.managed:
+    - source: salt://webpagetest/files/nginx.include.conf
+    - template: jinja
+    - makedirs: True
 
 /etc/php5/fpm/php.ini:
   file.managed:
