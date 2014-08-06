@@ -35,3 +35,11 @@ httpservices:
 
 include:
   - webpagetest.{{ pillar['webpagetest']['http'] }}
+
+/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/tmp:
+  mount.mounted:
+    - device: tmpfs
+    - fstype: tmpfs
+    - mkmnt: True
+    - opts:
+      - size=256m
