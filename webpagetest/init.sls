@@ -49,7 +49,7 @@ include:
     - source: salt://webpagetest/files/settings.ini
     - template: jinja
 
-/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/settings/locations.ini
+/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/settings/locations.ini:
   file.managed:
     - source: salt://webpagetest/files/locations.ini
     - template: jinja
