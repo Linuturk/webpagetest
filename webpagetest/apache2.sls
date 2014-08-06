@@ -1,3 +1,7 @@
+stop-nginx:
+  service.stopped:
+    - name: nginx
+
 /etc/apache2/mods-enabled/expires.load:
   file.symlink:
     - target: ../mods-available/expires.load
