@@ -43,3 +43,13 @@ include:
     - mkmnt: True
     - opts:
       - size=256m
+
+/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/settings/settings.ini:
+  file.managed:
+    - source: salt://webpagetest/files/settings.ini
+    - template: jinja
+
+/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/settings/locations.ini
+  file.managed:
+    - source: salt://webpagetest/files/locations.ini
+    - template: jinja

@@ -19,3 +19,8 @@ webpagetest:
     post_max_size: "12M"
     memory_limit: "512M"
     fpm: "unix:/var/run/php5-fpm.sock"
+  settings:
+    product: "WebPageTest"
+    contact: "contact@domain.com"
+    maxruns: 9
+    allowPrivate: 0
