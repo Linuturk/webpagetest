@@ -1,3 +1,3 @@
-stop-apache2:
-  service.stopped:
+remove-apache2:
+  pkg.removed:
     - name: apache2

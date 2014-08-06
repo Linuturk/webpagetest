@@ -1,5 +1,5 @@
-stop-nginx:
-  service.stopped:
+remove-nginx:
+  pkg.removed:
     - name: nginx
 
 /etc/apache2/mods-enabled/expires.load:
