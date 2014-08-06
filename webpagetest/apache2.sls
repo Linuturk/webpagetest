@@ -27,7 +27,7 @@ remove-nginx:
     - template: jinja
   service.running:
     - name: apache2
-      watch:
+    - watch:
         - file: /etc/apache2/sites-available/{{ pillar['webpagetest']['sitename'] }}.conf
         - file: /etc/php5/apache2/php.ini
 
