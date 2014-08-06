@@ -1,6 +1,6 @@
-remove-nginx:
+remove-apache2:
   pkg.removed:
-    - name: nginx
+    - name: apache2
 
 /etc/nginx/sites-enabled/default:
   file.absent
