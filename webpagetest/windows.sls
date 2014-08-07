@@ -33,7 +33,6 @@ stable-clock:
     - source: salt://webpagetest/powershell/Set-StableClock.ps1
     - shell: powershell
 
-/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}:
 'C:\webpagetest':
   archive.extracted:
     - source: pillar['webpagetest']['zipurl']
