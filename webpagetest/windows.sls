@@ -1,8 +1,7 @@
 close-port-445:
-  win_firewall.add_rule:
-    - name: WinRM
-    - localport: 445
-    - action: deny
+  cmd.script:
+    - source: salt://webpagetest/powershell/Set-ClosePort445.ps1
+    - shell: powershell
 
 disable-ie-esc:
   cmd.script:
