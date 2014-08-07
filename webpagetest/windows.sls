@@ -32,3 +32,11 @@ stable-clock:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-StableClock.ps1
     - shell: powershell
+
+/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}:
+'C:\webpagetest':
+  archive.extracted:
+    - source: pillar['webpagetest']['zipurl']
+    - source_hash: pillar['webpagetest']['zipsha']
+    - archive_format: zip
+    - if_missing: 'C:\webpagetest\agent'
