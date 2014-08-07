@@ -1,3 +1,9 @@
+close-port-445:
+  win_firewall.add_rule:
+    - name: WinRM
+    - localport: 445
+    - action: deny
+
 disable-ie-esc:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-DisableIESecurity.ps1
