@@ -17,8 +17,8 @@ httpservices:
 
 /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}:
   archive.extracted:
-    - source: pillar['webpagetest']['zipurl']
-    - source_hash: pillar['webpagetest']['zipsha']
+    - source: {{ pillar['webpagetest']['zipurl'] }}
+    - source_hash: {{ pillar['webpagetest']['zipsha'] }}
     - archive_format: zip
     - if_missing: /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www
 
