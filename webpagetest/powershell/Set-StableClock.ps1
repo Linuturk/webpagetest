@@ -1,3 +1,8 @@
-Start-Process -wait bcdedit -ArgumentList "/set {default}, useplatformclock true"
 $allthings = bcdedit | Select-String -pattern "useplatformclock        Yes"
 Write-Output $allthings
+
+if ($useplatformclock) {
+  Write-Output "changed=no comment='Platform Clock Already Enabled'"
+} Else {
+  Start-Process -wait bcdedit -ArgumentList "/set {default}, useplatformclock true"
+}
