@@ -3,7 +3,7 @@ $Path = 'HKCU:\Control Panel\Desktop'
 $CurrentVal = Get-ItemProperty -Path $Path -Name ScreenSaveActive
 Write-Output $CurrentVal
 
-if ($CurrentVal -ne 0) {
+if ($CurrentVal.ScreenSaveActive -ne 0) {
   Set-ItemProperty -Path $Path -Name ScreenSaveActive -Value 0
   Write-Output "Screensaver Disabled."
 } Else {

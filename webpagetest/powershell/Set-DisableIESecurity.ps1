@@ -4,10 +4,9 @@ $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8
 $CurrentVal = Get-ItemProperty -Path $AdminKey -Name "IsInstalled"
 Write-Output $CurrentVal
 
-if ($CurrentVal -ne 0) {
+if ($CurrentVal.IsInstalled -ne 0) {
   Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 0
   Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 0
-  Stop-Process -Name Explorer
   Write-Output "IE ESC Disabled."
 } Else {
   Write-Output "IE ESC Already Disabled."
