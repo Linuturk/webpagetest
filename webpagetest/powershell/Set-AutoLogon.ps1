@@ -5,7 +5,7 @@ $Password = "{{ pillar['webpagetest']['win_pass'] }}"
 $CurrentVal = Get-ItemProperty -Path $LogonPath -Name AutoAdminLogon
 Write-Output $CurrentVal
 
-If ($CurrentVal.AutoAdminLogon -ne 1) {
+If ($CurrentVal.AutoAdminLogon -ne 0) {
   Set-ItemProperty -Path $LogonPath -Name AutoAdminLogon -Value 1
   Set-ItemProperty -Path $LogonPath -Name DefaultUserName -Value $Username
   Set-ItemProperty -Path $LogonPath -Name DefaultPassword -Value $Password
