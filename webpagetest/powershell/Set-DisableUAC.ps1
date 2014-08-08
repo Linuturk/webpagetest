@@ -5,7 +5,7 @@ Write-Output $CurrentVal
 
 if ($CurrentVal.ConsentPromptBehaviorAdmin -ne 00000000) {
   Set-ItemProperty -Path $Path -Name "ConsentPromptBehaviorAdmin" -Value 00000000
-  Write-Output "UAC Disabled."
+  Write-Output "changed=yes comment='UAC Disabled.'"
 } Else {
-  Write-Output "UAC Already Disabled."
+  Write-Output "changed=no comment='UAC Already Disabled.'"
 }

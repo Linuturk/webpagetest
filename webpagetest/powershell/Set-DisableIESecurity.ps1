@@ -7,7 +7,7 @@ Write-Output $CurrentVal
 if ($CurrentVal.IsInstalled -ne 0) {
   Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 0
   Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 0
-  Write-Output "IE ESC Disabled."
+  Write-Output "changed=yes comment='IE ESC Disabled.'"
 } Else {
-  Write-Output "IE ESC Already Disabled."
+  Write-Output "changed=no comment='IE ESC Already Disabled.'"
 }

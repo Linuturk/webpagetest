@@ -5,7 +5,7 @@ Write-Output $CurrentVal
 
 if ($CurrentVal.ShutdownReasonUI -ne 0) {
   Set-ItemProperty -Path $Path -Name ShutdownReasonUI -Value 0
-  Write-Output "Shutdown Tracker Disabled."
+  Write-Output "changed=yes comment='Shutdown Tracker Disabled.'"
 } Else {
-  Write-Output "Shutdown Tracker Already Disabled."
+  Write-Output "changed=no comment='Shutdown Tracker Already Disabled.'"
 }

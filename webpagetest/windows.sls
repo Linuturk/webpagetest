@@ -7,26 +7,31 @@ disable-ie-esc:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-DisableIESecurity.ps1
     - shell: powershell
+    - stateful: True
 
 disable-screensaver:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-DisableScreensaver.ps1
     - shell: powershell
+    - stateful: True
 
 disable-shutdown-tracker:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-DisableShutdownTracker.ps1
     - shell: powershell
+    - stateful: True
 
 disable-uac:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-DisableUAC.ps1
     - shell: powershell
+    - stateful: True
 
 set-auto-logon:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-AutoLogon.ps1
     - shell: powershell
+    - stateful: True
 
 stable-clock:
   cmd.script:
