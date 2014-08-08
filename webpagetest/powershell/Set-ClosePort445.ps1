@@ -1,4 +1,3 @@
-netsh advfirewall firewall add rule name="WinRM" dir=in protocol=TCP localport=445 action=allow
 $CurrentVal = Get-NetFirewallRule -DisplayName WinRM
 Write-Output $CurrentVal
 
