@@ -10,3 +10,4 @@ if ($CurrentVal) {
   Write-Output "changed=yes comment='Port 445 Disabled.'"
 } Else {
   Write-Output "changed=no comment='Port 445 Already Disabled.'"
+}
