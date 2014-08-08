@@ -38,6 +38,7 @@ stable-clock:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-StableClock.ps1
     - shell: powershell
+    - stateful: True
 
 #'C:\webpagetest':
 #  archive.extracted:
