@@ -28,6 +28,13 @@ disable-uac:
     - shell: powershell
     - stateful: True
 
+create-user:
+  cmd.script:
+    - source: salt://webpagetest/powershell/Set-WebPageTestUser.ps1
+    - shell: powershell
+    - stateful: True
+    - template: jinja
+
 set-auto-logon:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-AutoLogon.ps1
