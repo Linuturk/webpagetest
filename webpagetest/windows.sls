@@ -2,6 +2,7 @@ close-port-445:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-ClosePort445.ps1
     - shell: powershell
+    - stateful: True
 
 disable-ie-esc:
   cmd.script:
