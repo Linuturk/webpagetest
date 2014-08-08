@@ -33,6 +33,7 @@ set-auto-logon:
     - source: salt://webpagetest/powershell/Set-AutoLogon.ps1
     - shell: powershell
     - stateful: True
+    - template: jinja
 
 stable-clock:
   cmd.script:
