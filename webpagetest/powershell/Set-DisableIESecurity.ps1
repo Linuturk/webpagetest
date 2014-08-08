@@ -4,7 +4,6 @@ $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8
 $CurrentVal = Get-ItemProperty -Path $AdminKey -Name "IsInstalled"
 
 if ($CurrentVal -ne 0) {
-  Disable-IEESC
   Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 0
   Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 0
   Stop-Process -Name Explorer
