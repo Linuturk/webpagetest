@@ -4,6 +4,8 @@ webpagetest:
   zipsha: "sha256=19ee9df78205f99153c6fa80b6e6e98394cc680c4a9e13b31bf4c7a9e374bad8"
   http: "apache2" # nginx or apache2
   php: "php5" # php5 or php5-fpm
+  win_user: "webpagetest"
+  win_pass: "changeme123"
   packages:
     - imagemagick
     - libimage-exiftool-perl
