@@ -3,6 +3,7 @@ $Username = "{{ pillar['webpagetest']['win_user'] }}"
 $Password = "{{ pillar['webpagetest']['win_pass'] }}"
 
 $CurrentVal = Get-ItemProperty -Path $LogonPath -Name AutoAdminLogon
+Write-Output $CurrentVal
 
 If ($CurrentVal -ne 1) {
   Set-ItemProperty -Path $LogonPath -Name AutoAdminLogon -Value 1
