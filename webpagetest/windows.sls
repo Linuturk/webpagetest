@@ -33,9 +33,9 @@ stable-clock:
     - source: salt://webpagetest/powershell/Set-StableClock.ps1
     - shell: powershell
 
-'C:\webpagetest':
-  archive.extracted:
-    - source: {{ pillar['webpagetest']['zipurl'] }}
-    - source_hash: {{ pillar['webpagetest']['zipsha'] }}
-    - archive_format: zip
-    - if_missing: 'C:\webpagetest\agent'
+#'C:\webpagetest':
+#  archive.extracted:
+#    - source: {{ pillar['webpagetest']['zipurl'] }}
+#    - source_hash: {{ pillar['webpagetest']['zipsha'] }}
+#    - archive_format: zip
+#    - if_missing: 'C:\webpagetest\agent'
