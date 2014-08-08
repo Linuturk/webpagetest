@@ -1,7 +1,8 @@
+netsh advfirewall firewall add rule name="WinRM" dir=in protocol=TCP localport=445 action=allow
 $CurrentVal = Get-NetFirewallRule -DisplayName WinRM
 Write-Output $CurrentVal
 
-if ($CurrentVal.Enabled -eq True) {
+if ($CurrentVal.Enabled) {
   Disable-NetFirewallRule -DisplayName WinRM
   Write-Output "changed=yes comment='Port 445 Disabled.'"
 } Else {
