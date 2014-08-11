@@ -34,12 +34,15 @@ httpservices:
       - user
       - group
       - mode
+    - require_in:
+      - mount: mount-tmpfs
 
 include:
   - webpagetest.{{ pillar['webpagetest']['http'] }}
 
-/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/tmp:
+mount-tmpfs:
   mount.mounted:
+    - name: /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/tmp
     - device: tmpfs
     - fstype: tmpfs
     - mkmnt: True
