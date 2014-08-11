@@ -30,8 +30,6 @@ remove-nginx:
     - watch:
         - file: /etc/apache2/sites-available/{{ pillar['webpagetest']['sitename'] }}.conf
         - file: /etc/php5/apache2/php.ini
-    - require:
-      - pkg: apache2
 
 /etc/php5/apache2/php.ini:
   file.managed:

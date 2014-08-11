@@ -18,8 +18,6 @@ remove-apache2:
     - watch:
         - file: /etc/nginx/sites-available/{{ pillar['webpagetest']['sitename'] }}.conf
         - file: /etc/nginx/include/{{ pillar['webpagetest']['sitename'] }}.include.conf
-    - require:
-      - pkg: nginx
 
 /etc/nginx/include/{{ pillar['webpagetest']['sitename'] }}.include.conf:
   file.managed:
