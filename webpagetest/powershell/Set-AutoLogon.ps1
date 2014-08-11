@@ -7,9 +7,8 @@ $CurrentVal = Get-ItemProperty -Path $LogonPath -Name AutoAdminLogon
 If ($CurrentVal.AutoAdminLogon -eq 1) {
   $CurrentUser = Get-ItemProperty -Path $LogonPath -Name DefaultUserName
   $CurrentPass = Get-ItemProperty -Path $LogonPath -Name DefaultPassword
-  Write-Output $CurrentUser
 
-  If ($CurrentUser -ne $Username -Or $CurrentPass -ne $Password) {
+  If ($CurrentUser.DefaultUserName -ne $Username -Or $CurrentPass.DefaultPassword -ne $Password) {
     Set-ItemProperty -Path $LogonPath -Name DefaultUserName -Value $Username
     Set-ItemProperty -Path $LogonPath -Name DefaultPassword -Value $Password
     Write-Output "changed=yes comment='Credentials Updated.'"
