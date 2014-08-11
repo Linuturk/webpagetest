@@ -1,5 +1,4 @@
 $CurrentVal = Get-NetFirewallRule -DisplayName WinRM
-Write-Output $CurrentVal
 
 if ($CurrentVal.Enabled -eq "True") {
   Disable-NetFirewallRule -DisplayName WinRM

@@ -1,5 +1,4 @@
 $useplatformclock = bcdedit | Select-String -pattern "useplatformclock        Yes"
-Write-Output $useplatformclock
 
 if ($useplatformclock) {
   Write-Output "changed=no comment='Platform Clock Already Enabled.'"

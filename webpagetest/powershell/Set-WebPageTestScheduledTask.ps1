@@ -3,7 +3,6 @@ $User = "{{ pillar['webpagetest']['win_user'] }}"
 $InstallDir = "{{ pillar['webpagetest']['win_install_dir'] }}\agent"
 
 $GetTask = Get-ScheduledTask -TaskName "wptdriver"
-Write-Output $GetTask
 
 if ($GetTask) {
   Write-Output "changed=no comment='Task already scheduled.'"

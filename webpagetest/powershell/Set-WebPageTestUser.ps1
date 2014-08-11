@@ -2,7 +2,6 @@ $Username = "{{ pillar['webpagetest']['win_user'] }}"
 $Password = "{{ pillar['webpagetest']['win_pass'] }}"
 
 $Exists = [ADSI]::Exists("WinNT://./$Username")
-Write-Output $Exists
 
 if ($Exists) {
   Write-Output "changed=no comment='$Username user already exists.'"
