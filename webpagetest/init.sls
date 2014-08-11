@@ -5,6 +5,8 @@ packages:
 ffmpeg:
   pkgrepo.managed:
     - ppa: jon-severinsson/ffmpeg
+    - require:
+      - pkg: python-software-properties
   pkg.installed:
     - name: ffmpeg
     - refresh: True
