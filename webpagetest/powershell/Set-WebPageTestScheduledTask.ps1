@@ -8,7 +8,7 @@ Write-Output $GetTask
 if ($GetTask) {
   Write-Output "changed=no comment='Task already scheduled.'"
 } Else {
-  $A = New-ScheduledTaskAction –Execute "$InstallDir\wptdriver.exe"
+  $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
   $T = New-ScheduledTaskTrigger -AtLogon
   $P = "$Host\$User"
   $S = New-ScheduledTaskSettingsSet
