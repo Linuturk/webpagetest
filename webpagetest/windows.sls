@@ -50,12 +50,13 @@ stable-clock:
     - shell: powershell
     - stateful: True
 
-#'C:\webpagetest':
-#  archive.extracted:
-#    - source: {{ pillar['webpagetest']['zipurl'] }}
-#    - source_hash: {{ pillar['webpagetest']['zipsha'] }}
-#    - archive_format: zip
-#    - if_missing: 'C:\webpagetest\agent'
+manage-temp-dir:
+  file.directory:
+    - name: {{ pillar['webpagetest']['win_temp_dir'] }}
+
+manage-install-dir:
+  file.directory:
+    - name: {{ pillar['webpagetest']['win_install_dir'] }}
 
 extract-installer:
   cmd.script:
