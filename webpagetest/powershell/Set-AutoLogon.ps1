@@ -7,6 +7,7 @@ $CurrentVal = Get-ItemProperty -Path $LogonPath -Name AutoAdminLogon
 If ($CurrentVal.AutoAdminLogon -eq 1) {
   $CurrentUser = Get-ItemProperty -Path $LogonPath -Name DefaultUserName
   $CurrentPass = Get-ItemProperty -Path $LogonPath -Name DefaultPassword
+  Write-Out $CurrentUser
 
   If ($CurrentUser -ne $Username -Or $CurrentPass -ne $Password) {
     Set-ItemProperty -Path $LogonPath -Name DefaultUserName -Value $Username
