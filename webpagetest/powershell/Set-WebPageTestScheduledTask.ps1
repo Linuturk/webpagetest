@@ -1,5 +1,5 @@
-$Host = {{ grains.host }}
-$User = {{ pillar['webpagetest']['win_user'] }}
+$Host = "{{ grains.host }}"
+$User = "{{ pillar['webpagetest']['win_user'] }}"
 $InstallDir = "{{ pillar['webpagetest']['win_install_dir'] }}\agent"
 
 $GetTask = Get-ScheduledTask -TaskName "wptdriver"
