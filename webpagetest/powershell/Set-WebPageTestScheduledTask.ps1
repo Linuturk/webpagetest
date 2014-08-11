@@ -10,9 +10,10 @@ if ($GetTask) {
 } Else {
   $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
   $T = New-ScheduledTaskTrigger -AtLogon
-  $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User"
   $S = New-ScheduledTaskSettingsSet
-  $D = New-ScheduledTask -Action $A -Principal $P -Trigger $T -Settings $S
-  Register-ScheduledTask T1 -TaskName "wptdriver" -InputObject $D
+  $U = "$ThisHost\$User"
+  $P = "{{ pillar['webpagetest']['win_pass'] }}"
+  $D = New-ScheduledTask -Action $A  -Trigger $T -Settings $S
+  Register-ScheduledTask T1 -TaskName "wptdriver" -InputObject $D -User $U -Password $P
   Write-Output "changed=yes comment='Task scheduled.'"
 }
