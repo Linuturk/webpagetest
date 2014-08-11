@@ -41,6 +41,8 @@ set-auto-logon:
     - shell: powershell
     - stateful: True
     - template: jinja
+    - require:
+      - cmd: create-user
 
 stable-clock:
   cmd.script:
