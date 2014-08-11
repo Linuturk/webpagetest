@@ -56,3 +56,10 @@ stable-clock:
 #    - source_hash: {{ pillar['webpagetest']['zipsha'] }}
 #    - archive_format: zip
 #    - if_missing: 'C:\webpagetest\agent'
+
+extract-installer:
+  cmd.script:
+    - source: salt://webpagetest/powershell/Set-WebPageTestInstall.ps1
+    - shell: powershell
+    - template: jinja
+    - stateful: True
