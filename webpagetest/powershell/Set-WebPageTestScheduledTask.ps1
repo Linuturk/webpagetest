@@ -1,4 +1,4 @@
-$Host = "{{ grains.host }}"
+$ThisHost = "{{ grains.host }}"
 $User = "{{ pillar['webpagetest']['win_user'] }}"
 $InstallDir = "{{ pillar['webpagetest']['win_install_dir'] }}\agent"
 
@@ -10,7 +10,7 @@ if ($GetTask) {
 } Else {
   $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
   $T = New-ScheduledTaskTrigger -AtLogon
-  $P = "$Host\$User"
+  $P = "$ThisHost\$User"
   $S = New-ScheduledTaskSettingsSet
   $D = New-ScheduledTask -Action $A -Principal $P -Trigger $T -Settings $S
   Register-ScheduledTask -TaskName "wptdriver" -InputObject $D
