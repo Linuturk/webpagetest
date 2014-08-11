@@ -1,6 +1,7 @@
 $InstallDir = {{ pillar['webpagetest']['win_install_dir'] }}
+$TempDir = {{ pillar['webpagetest']['win_temp_dir'] }}
 $URL = {{ pillar['webpagetest']['zipurl'] }}
-$ZipFile = "$InstallDir\{{ pillar['webpagetest']['win_zip_file'] }}"
+$ZipFile = "$TempDir\{{ pillar['webpagetest']['win_zip_file'] }}"
 
 function Expand-ZIPFile($file, $destination) {
 
