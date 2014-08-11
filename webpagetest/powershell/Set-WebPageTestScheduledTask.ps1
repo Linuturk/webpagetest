@@ -13,6 +13,6 @@ if ($GetTask) {
   $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User"
   $S = New-ScheduledTaskSettingsSet
   $D = New-ScheduledTask -Action $A -Principal $P -Trigger $T -Settings $S
-  Register-ScheduledTask -TaskName "wptdriver" -InputObject $D
+  Register-ScheduledTask T1 -TaskName "wptdriver" -InputObject $D
   Write-Output "changed=yes comment='Task scheduled.'"
 }
