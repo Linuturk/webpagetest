@@ -1,0 +1,12 @@
+wpt-linux:
+    provider: my-rackspace-config
+    size: 2 GB Performance
+    image: Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
+wpt-windows:
+    provider: my-rackspace-config
+    size: 4 GB Performance
+    image: 59901295-8ae6-4ab4-a697-01261799c8ac
+    win_installer: /root/Salt-Minion-2014.1.7-AMD64-Setup.exe
+    files:
+      'C:\cloud-automation\bootstrap.cmd':
+        /root/bootstrap.cmd

@@ -1,0 +1,6 @@
+wpt-linux:
+  - web01.webpagetest.example.com
+  - web02.webpagetest.example.com
+wpt-windows:
+  - win01.webpagetest.example.com
+  - win02.webpagetest.example.com
