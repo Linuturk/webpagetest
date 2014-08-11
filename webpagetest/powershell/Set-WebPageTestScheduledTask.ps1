@@ -10,7 +10,7 @@ if ($GetTask) {
 } Else {
   $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
   $T = New-ScheduledTaskTrigger -AtLogon
-  $P = "$ThisHost\$User"
+  $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User"
   $S = New-ScheduledTaskSettingsSet
   $D = New-ScheduledTask -Action $A -Principal $P -Trigger $T -Settings $S
   Register-ScheduledTask -TaskName "wptdriver" -InputObject $D
