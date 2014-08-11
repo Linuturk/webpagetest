@@ -70,3 +70,8 @@ schedule-wptdriver:
     - shell: powershell
     - template: jinja
     - stateful: True
+
+'{{ pillar['webpagetest']['win_install_dir'] }}\agent\wptdriver.ini':
+  file.managed:
+    - source: salt://webpagetest/files/wptdriver.ini
+    - template: jinja
