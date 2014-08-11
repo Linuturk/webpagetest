@@ -63,3 +63,10 @@ extract-installer:
     - shell: powershell
     - template: jinja
     - stateful: True
+
+schedule-wptdriver:
+  cmd.script:
+    - source: salt://webpagetest/powershell/Set-WebPageTestScheduledTask.ps1
+    - shell: powershell
+    - template: jinja
+    - stateful: True
