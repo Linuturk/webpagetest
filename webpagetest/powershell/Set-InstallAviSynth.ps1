@@ -1,4 +1,4 @@
-$InstallDir = "{{ pillar['webpagetest']['win_install_dir'] }}"
+$InstallDir = "{{ pillar['webpagetest']['win']['install_dir'] }}"
 
 $Installed = Test-Path "C:\Program Files (x86)\AviSynth 2.5" -pathType container
 

@@ -52,11 +52,11 @@ stable-clock:
 
 manage-temp-dir:
   file.directory:
-    - name: {{ pillar['webpagetest']['win_temp_dir'] }}
+    - name: {{ pillar['webpagetest']['win']['temp_dir'] }}
 
 manage-install-dir:
   file.directory:
-    - name: {{ pillar['webpagetest']['win_install_dir'] }}
+    - name: {{ pillar['webpagetest']['win']['install_dir'] }}
 
 extract-installer:
   cmd.script:
@@ -79,7 +79,7 @@ schedule-wptdriver:
     - template: jinja
     - stateful: True
 
-'{{ pillar['webpagetest']['win_install_dir'] }}\agent\wptdriver.ini':
+'{{ pillar['webpagetest']['win']['install_dir'] }}\agent\wptdriver.ini':
   file.managed:
     - source: salt://webpagetest/files/wptdriver.ini
     - template: jinja

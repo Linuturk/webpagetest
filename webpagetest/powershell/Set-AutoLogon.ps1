@@ -1,6 +1,6 @@
 $LogonPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
-$Username = "{{ grains.host }}\{{ pillar['webpagetest']['win_user'] }}"
-$Password = "{{ pillar['webpagetest']['win_pass'] }}"
+$Username = "{{ grains.host }}\{{ pillar['webpagetest']['win']['user'] }}"
+$Password = "{{ pillar['webpagetest']['win']['pass'] }}"
 
 $CurrentVal = Get-ItemProperty -Path $LogonPath -Name AutoAdminLogon
 

@@ -1,5 +1,5 @@
-$Username = "{{ pillar['webpagetest']['win_user'] }}"
-$Password = "{{ pillar['webpagetest']['win_pass'] }}"
+$Username = "{{ pillar['webpagetest']['win']['user'] }}"
+$Password = "{{ pillar['webpagetest']['win']['pass'] }}"
 
 $Exists = [ADSI]::Exists("WinNT://./$Username")
 
