@@ -14,6 +14,6 @@ if ($GetTask) {
   $U = "$ThisHost\$User"
   $P = "{{ pillar['webpagetest']['win_pass'] }}"
   $D = New-ScheduledTask -Action $A  -Trigger $T -Settings $S
-  Register-ScheduledTask T1 -TaskName "wptdriver" -InputObject $D -User $U -Password $P
+  Register-ScheduledTask -TaskName "wptdriver" -InputObject $D -User $U -Password $P
   Write-Output "changed=yes comment='Task scheduled.'"
 }
