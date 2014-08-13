@@ -30,7 +30,7 @@ webpagetest:
     contact: "contact@domain.com"
     maxruns: 9
     allowPrivate: 0
-    key: "changeme"
+    key: "changeme" #Do not use an & in your key
   locations:
     - name: TestLocation
       label: TestLabel
