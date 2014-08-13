@@ -56,3 +56,8 @@ mount-tmpfs:
   file.managed:
     - source: salt://webpagetest/files/locations.ini
     - template: jinja
+
+/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/settings/feeds.inc:
+  file.managed:
+    - source: salt://webpagetest/files/feeds.inc
+    - template: jinja
