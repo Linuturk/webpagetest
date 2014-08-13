@@ -15,5 +15,4 @@ Also assumes a Cloud Load Balancer as a failover tool for the front end.
 
 ## TODO
  * Traffic Shaping DummyNET Broken.
- * Dynamic Configuration of Locations.
- * Multiple Browsers.
+ * Multiple backend node configuration (grains)
