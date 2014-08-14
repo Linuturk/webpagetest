@@ -20,3 +20,42 @@ PSComputerName       :
 ifAlias              : public0
 InterfaceAlias       : public0
 ifDesc               : Citrix PV Network Adapter #0
+
+
+# salt 'win*' cmd.run shell=powershell 'Get-NetAdapterBinding -Name public -DisplayName ipfw+dummynet | GM'
+win01.webpagetest.rax.io:
+    
+    
+       TypeName: Microsoft.Management.Infrastructure.CimInstance#ROOT/StandardCimv2
+    /MSFT_NetAdapterBindingSettingData
+    
+    Name                      MemberType    Definition                             
+    ----                      ----------    ----------                             
+    ifAlias                   AliasProperty ifAlias = Name                         
+    ifDesc                    AliasProperty ifDesc = InterfaceDescription          
+    InterfaceAlias            AliasProperty InterfaceAlias = Name                  
+    Clone                     Method        System.Object ICloneable.Clone()       
+    Dispose                   Method        void Dispose(), void IDisposable.Dis...
+    Equals                    Method        bool Equals(System.Object obj)         
+    GetCimSessionComputerName Method        string GetCimSessionComputerName()     
+    GetCimSessionInstanceId   Method        guid GetCimSessionInstanceId()         
+    GetHashCode               Method        int GetHashCode()                      
+    GetObjectData             Method        void GetObjectData(System.Runtime.Se...
+    GetType                   Method        type GetType()                         
+    ToString                  Method        string ToString()                      
+    BindName                  Property      string BindName {get;}                 
+    Caption                   Property      string Caption {get;set;}              
+    Characteristics           Property      uint32 Characteristics {get;}          
+    ComponentClassGuid        Property      string ComponentClassGuid {get;}       
+    ComponentClassName        Property      string ComponentClassName {get;}       
+    ComponentID               Property      string ComponentID {get;}              
+    Description               Property      string Description {get;set;}          
+    DisplayName               Property      string DisplayName {get;}              
+    ElementName               Property      string ElementName {get;set;}          
+    Enabled                   Property      bool Enabled {get;set;}                
+    InstanceID                Property      string InstanceID {get;set;}           
+    InterfaceDescription      Property      string InterfaceDescription {get;}     
+    Name                      Property      string Name {get;}                     
+    PSComputerName            Property      string PSComputerName {get;}           
+    Source                    Property      uint32 Source {get;}                   
+    SystemName                Property      string SystemName {get;}
