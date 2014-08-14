@@ -1,3 +1,7 @@
+INF file install?
+Add network adapter binding service powershell
+
+
 PS C:\Users\Administrator> Get-NetAdapterBinding public0 -DisplayName ipfw+dummynet | format-list
 
 
