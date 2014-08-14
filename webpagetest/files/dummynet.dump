@@ -1,0 +1,22 @@
+PS C:\Users\Administrator> Get-NetAdapterBinding public0 -DisplayName ipfw+dummynet | format-list
+
+
+Caption              : MSFT_NetAdapterBindingSettingData 'Citrix PV Network Adapter #0'
+Description          : ipfw+dummynet
+ElementName          : unipi_ipfw
+InstanceID           : {906E5591-5C6C-4D07-BB8D-BA387BA4B646}::unipi_ipfw
+InterfaceDescription : Citrix PV Network Adapter #0
+Name                 : public0
+Source               : 1
+SystemName           : ComputerName
+BindName             : Ipfw
+Characteristics      : 17424
+ComponentClassGuid   : {4D36E974-E325-11CE-BFC1-08002BE10318}
+ComponentClassName   : Filter
+ComponentID          : unipi_ipfw
+DisplayName          : ipfw+dummynet
+Enabled              : True
+PSComputerName       :
+ifAlias              : public0
+InterfaceAlias       : public0
+ifDesc               : Citrix PV Network Adapter #0
