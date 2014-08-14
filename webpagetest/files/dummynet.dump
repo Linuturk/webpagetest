@@ -59,3 +59,19 @@ win01.webpagetest.rax.io:
     PSComputerName            Property      string PSComputerName {get;}           
     Source                    Property      uint32 Source {get;}                   
     SystemName                Property      string SystemName {get;}
+
+
+# salt 'win*' cmd.run shell=powershell 'Set-NetAdapterBinding -Name public0 -Component unipi_ipfw -Enabled $True'
+win01.webpagetest.rax.io:
+    Set-NetAdapterBinding : No matching MSFT_NetAdapterBindingSettingData objects
+    found by CIM query for instances of the
+    ROOT/StandardCimv2/MSFT_NetAdapterBindingSettingData class on the  CIM server:
+    SELECT * FROM MSFT_NetAdapterBindingSettingData  WHERE ((Name LIKE 'public0'))
+    AND ((ComponentID LIKE 'unipi[_]ipfw')). Verify query parameters and retry.
+    At line:1 char:1
+    + Set-NetAdapterBinding -Name public0 -Component unipi_ipfw -Enabled $True
+    + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        + CategoryInfo          : ObjectNotFound: (MSFT_NetAdapterBindingSettingDa
+       ta:String) [Set-NetAdapterBinding], CimJobException
+        + FullyQualifiedErrorId : CmdletizationQuery_NotFound,Set-NetAdapterBindin
+       g
