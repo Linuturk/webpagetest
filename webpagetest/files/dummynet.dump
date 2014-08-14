@@ -1,6 +1,10 @@
 INF file install?
 Add network adapter binding service powershell
 
+I need to be able to do this: http://windows.microsoft.com/en-US/windows-vista/Add-or-remove-a-network-protocol-service-or-client 
+
+via powershell.
+
 
 PS C:\Users\Administrator> Get-NetAdapterBinding public0 -DisplayName ipfw+dummynet | format-list
 
