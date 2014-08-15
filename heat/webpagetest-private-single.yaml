@@ -11,12 +11,6 @@ parameter_groups:
   - image
   - flavor
 
-- label: ASP .Net Application Settings
-  parameters:
-  - domain
-  - ftp_username
-  - aspdotnet_version
-
 - label: rax-dev-params
   parameters:
   - server_hostname
@@ -71,33 +65,6 @@ parameters:
       - 15GB Standard Instance
       - 30GB Standard Instance
       description: must be a valid Rackspace Cloud Server flavor.
-
-  # ASP .Net settings
-  domain:
-    label: Site Domain
-    description: Domain to be used with the ASP .net site
-    type: string
-    default: "example.com"
-    constraints:
-    - allowed_pattern: "^[a-zA-Z0-9.-]{1,255}.[a-zA-Z]{2,15}$"
-      description: Must be a valid domain name
-
-  ftp_username:
-    label: FTP Username
-    description: |
-      FTP Username for the site. A password will be randomly generated for this
-      account.
-    type: string
-    default: "ftp_user"
-    constraints:
-    - allowed_pattern: "^(?!^root$)([a-z0-9_]{1,16})$"
-      description: Must be a valid username
-
-  aspdotnet_version:
-    label: ASP .Net Version
-    description: Version of ASP .Net to install (4.5.1 includes 3.5 and 4.0)
-    type: string
-    default: 4.5.1
 
 resources:
 
