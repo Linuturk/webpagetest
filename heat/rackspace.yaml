@@ -1,0 +1,36 @@
+chema-version: 1.0.0
+application-family: Application Frameworks
+application-name: ASP .Net
+application-version: 4.5.1
+flavor: Single Windows server
+flavor-weight: 1
+reach-info:
+  icon-20x20: https://0b5294b243620310a700-e388a7f3aba385a925111b1fc6f680d4.ssl.cf2.rackcdn.com/asp-net-icon-20x20.png
+  tattoo: https://0b5294b243620310a700-e388a7f3aba385a925111b1fc6f680d4.ssl.cf2.rackcdn.com/asp-net-tattoo.png
+hidden_outputs:
+  - admin_password
+  - site_ftp_password
+abstract: |
+  A single Windows server running [IIS](http://www.iis.net/), [ASP .Net
+  4.5.1](http://www.asp.net/), and a FTP site.
+instructions: |
+  #### Getting Started
+  If you're new to running a web application built with  ASP .Net framework
+  [ASP .Net Getting Started](http://www.asp.net/get-started)
+  will help walk you through learn about ASP .Net and [Getting Started with
+  IIS](http://www.iis.net/learn/get-started/getting-started-with-iis) has
+  great details about IIS and its parameters.
+
+  #### Logging in via Remote Desktop
+  The Administrator password is included in the passwords/secrets section
+  of this deployment. Use that password and the instructions found
+  [here](http://www.rackspace.com/knowledge_center/article/logging-in-to-your-server-via-rdp-windows)
+  to login and begin managing IIS.
+
+  #### Details of Your Setup
+  This setup was built using a [Powershell
+  Script](http://technet.microsoft.com/en-us/scriptcenter/dd742419.aspx).
+  Once the deployment is up, the script will not be run again, so it is
+  safe to change settings and configurations on your server and within
+  IIS. The FTP (File transfer Protocol) credential is included in the
+  passwords/secrets section of this deployment.
