@@ -78,7 +78,185 @@ resources:
       user_data:
         str_replace:
           template: |
-            # PowerShell Code Goes Here
+            # AutoLogon
+            $LogonPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+            $Username = "{{ grains.host }}\{{ pillar['webpagetest']['win']['user'] }}"
+            $Password = "{{ pillar['webpagetest']['win']['pass'] }}"
+            
+            $CurrentVal = Get-ItemProperty -Path $LogonPath -Name AutoAdminLogon
+            
+            If ($CurrentVal.AutoAdminLogon -eq 1) {
+              $CurrentUser = Get-ItemProperty -Path $LogonPath -Name DefaultUserName
+              $CurrentPass = Get-ItemProperty -Path $LogonPath -Name DefaultPassword
+            
+              If ($CurrentUser.DefaultUserName -ne $Username -Or $CurrentPass.DefaultPassword -ne $Password) {
+                Set-ItemProperty -Path $LogonPath -Name DefaultUserName -Value $Username
+                Set-ItemProperty -Path $LogonPath -Name DefaultPassword -Value $Password
+                Write-Output "changed=yes comment='Credentials Updated.'"
+              } Else {
+                Write-Output "changed=no comment='AutoLogon already enabled.'"
+              }
+            } Else {
+              Set-ItemProperty -Path $LogonPath -Name AutoAdminLogon -Value 1
+              New-ItemProperty -Path $LogonPath -Name DefaultUserName -Value $Username
+              New-ItemProperty -Path $LogonPath -Name DefaultPassword -Value $Password                                          
+              Write-Output "changed=yes comment='AutoLogon enabled.'"                                                           
+            }                                                                                                                   
+            # Close Port 445
+            $CurrentVal = Get-NetFirewallRule -DisplayName WinRM                                                                
+                                                                                                                                
+            if ($CurrentVal.Enabled -eq "True") {                                                                               
+              Disable-NetFirewallRule -DisplayName WinRM                                                                        
+              Write-Output "changed=yes comment='Port 445 Disabled.'"
+            } Else {
+              Write-Output "changed=no comment='Port 445 Already Disabled.'"
+            }
+            # Disable IE Enhanced Security
+            $AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
+            $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
+            
+            $CurrentVal = Get-ItemProperty -Path $AdminKey -Name "IsInstalled"
+            
+            if ($CurrentVal.IsInstalled -ne 0) {
+              Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 0
+              Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 0
+              Write-Output "changed=yes comment='IE ESC Disabled.'"
+            } Else {
+              Write-Output "changed=no comment='IE ESC Already Disabled.'"
+            }
+            # Disable ScreenSaver
+            $Path = 'HKCU:\Control Panel\Desktop'
+            
+            Try {
+              $CurrentVal = Get-ItemProperty -Path $Path -Name ScreenSaveActive
+              Write-Output $CurrentVal
+            } Catch {
+              $CurrentVal = False
+            } Finally {
+              if ($CurrentVal.ScreenSaveActive -ne 0) {
+                Set-ItemProperty -Path $Path -Name ScreenSaveActive -Value 0
+                Write-Output "changed=yes comment='Screensaver Disabled.'"
+              } Else {
+                Write-Output "changed=no comment='Screensaver Already Disabled.'"
+              }
+            }
+            # Disable Shutdown Tracking
+            $Path = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Reliability'
+            
+            Try {
+              $CurrentVal = Get-ItemProperty -Path $Path -Name ShutdownReasonUI
+              Write-Output $CurrentVal
+            } Catch {
+              $CurrentVal = False
+            } Finally {
+              if ($CurrentVal.ShutdownReasonUI -ne 0) {
+                New-ItemProperty -Path $Path -Name ShutdownReasonUI -Value 0
+                Write-Output "changed=yes comment='Shutdown Tracker Disabled.'"
+              } Else {
+                Write-Output "changed=no comment='Shutdown Tracker Already Disabled.'"
+              }
+            }
+            # Disable UAC
+            $Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+            
+            $CurrentVal = Get-ItemProperty -Path $Path -Name ConsentPromptBehaviorAdmin
+            
+            if ($CurrentVal.ConsentPromptBehaviorAdmin -ne 00000000) {
+              Set-ItemProperty -Path $Path -Name "ConsentPromptBehaviorAdmin" -Value 00000000
+              Write-Output "changed=yes comment='UAC Disabled.'"
+            } Else {
+              Write-Output "changed=no comment='UAC Already Disabled.'"
+            }
+            # Install AviSynth
+            $InstallDir = "{{ pillar['webpagetest']['win']['install_dir'] }}"
+            
+            $Installed = Test-Path "C:\Program Files (x86)\AviSynth 2.5" -pathType container
+            
+            If ($Installed) {
+              Write-Output "changed=no comment='AviSynth already installed.'"
+            } Else {
+              & "$InstallDir\agent\Avisynth_258.exe" /S
+              Write-Output "changed=yes comment='AviSynth installed.'"
+            }
+            # Disable Test Signing for DummyNET Driver
+            $testsigning = bcdedit | Select-String -pattern "testsigning             Yes"
+            
+            if ($testsigning) {
+              Write-Output "changed=no comment='Test Signing Already Enabled.'"
+            } Else {
+              bcdedit /set TESTSIGNING ON
+              Write-Output "changed=yes comment='Test Signing Enabled.'"
+            }
+            # Set a Stable Clock Source
+            $useplatformclock = bcdedit | Select-String -pattern "useplatformclock        Yes"
+            
+            if ($useplatformclock) {
+              Write-Output "changed=no comment='Platform Clock Already Enabled.'"
+            } Else {
+              bcdedit /set  useplatformclock true
+              Write-Output "changed=yes comment='Platform Clock Enabled.'"
+            }
+            # Download and Extract ZIP File
+            $InstallDir = "{{ pillar['webpagetest']['win']['install_dir'] }}"
+            $TempDir = "{{ pillar['webpagetest']['win']['temp_dir'] }}"
+            $URL = "{{ pillar['webpagetest']['zipurl'] }}"
+            $ZipFile = "$TempDir\{{ pillar['webpagetest']['win']['zip_file'] }}"
+            
+            function Expand-ZIPFile($file, $destination) {
+            
+              $shell = new-object -com shell.application
+              $zip = $shell.NameSpace($file)
+            
+              foreach($item in $zip.items()) {
+                $shell.Namespace($destination).copyhere($item)
+              }
+            }
+            
+            $TestDir = "$InstallDir\agent"
+            
+            If (Test-Path $TestDir -pathType container) {
+              Write-Output "changed=no comment='WebPageTest already installed.'"
+            } Else {
+              $WebClient = New-Object System.Net.WebClient
+              $WebClient.DownloadFile($URL,$ZipFile)
+              Expand-ZIPFile -File $ZipFile -Destination $InstallDir
+              Write-Output "changed=yes comment='WebPageTest installed.'"
+            }
+            # Set a Scheduled Task to Launch the wptdriver agent.
+            $ThisHost = "{{ grains.host }}"
+            $User = "{{ pillar['webpagetest']['win']['user'] }}"
+            $InstallDir = "{{ pillar['webpagetest']['win']['install_dir'] }}\agent"
+            
+            $GetTask = Get-ScheduledTask -TaskName "wptdriver"
+            
+            if ($GetTask) {
+              Write-Output "changed=no comment='Task already scheduled.'"
+            } Else {
+              $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
+              $T = New-ScheduledTaskTrigger -AtLogon
+              $S = New-ScheduledTaskSettingsSet
+              $U = "$ThisHost\$User"
+              $P = "{{ pillar['webpagetest']['win']['pass'] }}"
+              $D = New-ScheduledTask -Action $A  -Trigger $T -Settings $S
+              Register-ScheduledTask -TaskName "wptdriver" -InputObject $D -User $U -Password $P
+              Write-Output "changed=yes comment='Task scheduled.'"
+            }
+            # Add the webpagetest user
+            $Username = "{{ pillar['webpagetest']['win']['user'] }}"
+            $Password = "{{ pillar['webpagetest']['win']['pass'] }}"
+            
+            $Exists = [ADSI]::Exists("WinNT://./$Username")
+            
+            if ($Exists) {
+              Write-Output "changed=no comment='$Username user already exists.'"
+            } Else {
+              net user /add $Username
+              net localgroup Administrators /add $Username
+              $user = [ADSI]("WinNT://./$Username")
+              $user.SetPassword($Password)
+              $user.SetInfo()
+              Write-Output "changed=yes comment='$Username created.'"
+            }
       params:
             "%%sitedomain" : { get_param:  domain }
             "%%ftpusername" : { get_param: ftp_username }
