@@ -83,3 +83,9 @@ schedule-wptdriver:
   file.managed:
     - source: salt://webpagetest/files/wptdriver.ini
     - template: jinja
+
+install-dummynet-binding:
+  cmd.script:
+    - source: salt://webpagetest/powershell/Set-InstallDummyNet.ps1
+    - shell: powershell
+    - template: jinja
