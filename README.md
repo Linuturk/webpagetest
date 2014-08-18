@@ -5,6 +5,8 @@ Salt States to deploy a private Web Page Test instance.
 
 ## Requirements
 
+**Windows Server 2012 R2**
+
 Assumes a properly configured Salt Master, including:
  * Salt-Cloud Provider
  * Salt-Cloud Profiles
