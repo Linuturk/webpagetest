@@ -34,14 +34,6 @@ parameters:
     default: Windows Server 2012 R2
     constraints:
     - allowed_values:
-      - Windows Server 2008 R2 SP1
-      - Windows Server 2008 R2 SP1 + SQL Server 2008 R2 SP2 Standard
-      - Windows Server 2008 R2 SP1 + SQL Server 2008 R2 SP2 Web
-      - Windows Server 2008 R2 SP1 + SQL Server 2012 SP1 Standard
-      - Windows Server 2008 R2 SP1 + SQL Server 2012 SP1 Web
-      - Windows Server 2012
-      - Windows Server 2012 + SQL Server 2012 SP1 Standard
-      - Windows Server 2012 + SQL Server 2012 SP1 Web
       - Windows Server 2012 R2
       description: must be a supported OS
 
@@ -59,11 +51,6 @@ parameters:
       - 8 GB Performance
       - 15 GB Performance
       - 30 GB Performance
-      - 2GB Standard Instance
-      - 4GB Standard Instance
-      - 8GB Standard Instance
-      - 15GB Standard Instance
-      - 30GB Standard Instance
       description: must be a valid Rackspace Cloud Server flavor.
 
 resources:
@@ -84,7 +71,7 @@ resources:
             $Password = "{{ pillar['webpagetest']['win']['pass'] }}"
             Set-ItemProperty -Path $LogonPath -Name AutoAdminLogon -Value 1
             New-ItemProperty -Path $LogonPath -Name DefaultUserName -Value $Username
-            New-ItemProperty -Path $LogonPath -Name DefaultPassword -Value $Password                                          
+            New-ItemProperty -Path $LogonPath -Name DefaultPassword -Value $Password
             # Disable IE Enhanced Security
             $AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
             $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
@@ -111,19 +98,14 @@ resources:
             $TempDir = "{{ pillar['webpagetest']['win']['temp_dir'] }}"
             $URL = "{{ pillar['webpagetest']['zipurl'] }}"
             $ZipFile = "$TempDir\{{ pillar['webpagetest']['win']['zip_file'] }}"
-            
             function Expand-ZIPFile($file, $destination) {
-            
               $shell = new-object -com shell.application
               $zip = $shell.NameSpace($file)
-            
               foreach($item in $zip.items()) {
                 $shell.Namespace($destination).copyhere($item)
               }
             }
-            
             $TestDir = "$InstallDir\agent"
-            
             $WebClient = New-Object System.Net.WebClient
             $WebClient.DownloadFile($URL,$ZipFile)
             Expand-ZIPFile -File $ZipFile -Destination $InstallDir
@@ -131,7 +113,6 @@ resources:
             $ThisHost = "{{ grains.host }}"
             $User = "{{ pillar['webpagetest']['win']['user'] }}"
             $InstallDir = "{{ pillar['webpagetest']['win']['install_dir'] }}\agent"
-            
             $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
             $T = New-ScheduledTaskTrigger -AtLogon
             $S = New-ScheduledTaskSettingsSet
@@ -142,7 +123,6 @@ resources:
             # Add the webpagetest user
             $Username = "{{ pillar['webpagetest']['win']['user'] }}"
             $Password = "{{ pillar['webpagetest']['win']['pass'] }}"
-            
             net user /add $Username
             net localgroup Administrators /add $Username
             $user = [ADSI]("WinNT://./$Username")
