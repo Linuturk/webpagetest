@@ -58,6 +58,10 @@ manage-install-dir:
   file.directory:
     - name: {{ pillar['webpagetest']['win']['install_dir'] }}
 
+install-mindinst:
+  file.managed:
+    - name: {{ pillar['webpagetest']['win']['install_dir'] }}\mindinst.exe
+
 extract-installer:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-WebPageTestInstall.ps1
