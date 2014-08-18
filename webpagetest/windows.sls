@@ -58,10 +58,6 @@ manage-install-dir:
   file.directory:
     - name: {{ pillar['webpagetest']['win']['install_dir'] }}
 
-install-mindinst:
-  file.managed:
-    - name: {{ pillar['webpagetest']['win']['install_dir'] }}\mindinst.exe
-
 extract-installer:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-WebPageTestInstall.ps1
@@ -88,6 +84,16 @@ schedule-wptdriver:
     - source: salt://webpagetest/files/wptdriver.ini
     - template: jinja
 
+install-mindinst:
+  file.managed:
+    - name: {{ pillar['webpagetest']['win']['install_dir'] }}\mindinst.exe
+    - source: salt://webpagetest/powershell/mindinst.exe
+
+place-dummynet-cert:
+  file.managed:
+    - name: {{ pillar['webpagetest']['win']['install_dir'] }}\WPOFoundation.cer
+    - source: salt://webpagetest/powershell/WPOFoundation.cer
+
 install-dummynet-binding:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-InstallDummyNet.ps1
@@ -96,3 +102,4 @@ install-dummynet-binding:
     - stateful: True
     - require:
       - file: install-mindinst
+      - file: place-dummynet-cert
