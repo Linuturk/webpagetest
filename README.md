@@ -14,5 +14,4 @@ Assumes a properly configured Salt Master, including:
 Also assumes a Cloud Load Balancer as a failover tool for the front end.
 
 ## TODO
- * Traffic Shaping DummyNET Broken.
  * Multiple backend node configuration (grains)
