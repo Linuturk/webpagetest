@@ -10,7 +10,7 @@ if ($testsigning) {
 cd C:\webpagetest
 
 Write-Output "Install ipfw+dummynet drivers on the all interface"
-.\mindinst.exe c:\webpagetest\netipfw.inf -i -s
+.\mindinst.exe c:\webpagetest\agent\dummynet\64bit\netipfw.inf -i -s
 
 $dummynet = Get-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet
 
