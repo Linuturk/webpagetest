@@ -93,3 +93,6 @@ install-dummynet-binding:
     - source: salt://webpagetest/powershell/Set-InstallDummyNet.ps1
     - shell: powershell
     - template: jinja
+    - stateful: True
+    - require:
+      - file: install-mindinst
