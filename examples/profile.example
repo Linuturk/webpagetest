@@ -10,3 +10,8 @@ wpt-windows:
     files:
       'C:\cloud-automation\bootstrap.cmd':
         /root/bootstrap.cmd
+    grains:
+      wpt_location: Location
+      wpt_label: Label
+      wpt_group: Group
+      wpt_browsers: "Chrome,Firefox,IE"

@@ -35,8 +35,8 @@ webpagetest:
     - name: TestLocation
       label: TestLabel
       group: TestGroup
-      browsers:
-        - Chrome
-        - Firefox
-        - IE
+      browsers: "Chrome,Firefox,IE"
+      drivers:
+        - wptdriver
+        - urlBlast
       default: True
