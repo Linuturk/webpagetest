@@ -22,6 +22,7 @@ When setting up your locations, you must create a new location list object in Pi
 When defining locations, you must match the following items:
 
 | Pillar | Grains |
+| ------ | ------ |
 | webpagetest.locations.name | wpt_location |
 | webpagetest.locations.label | wpt_label |
 | webpagetest.locations.group | wpt_group |
