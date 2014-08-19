@@ -72,7 +72,7 @@ install-avisynth:
     - template: jinja
     - stateful: True
 
-schedule-wptdriver:
+schedule-drivers:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-WebPageTestScheduledTask.ps1
     - shell: powershell
