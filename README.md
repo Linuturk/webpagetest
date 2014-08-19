@@ -15,5 +15,14 @@ Assumes a properly configured Salt Master, including:
 
 Also assumes a Cloud Load Balancer as a failover tool for the front end.
 
-## TODO
- * Multiple backend node configuration (grains)
+## Locations
+
+When setting up your locations, you must create a new location list object in Pillar for each location. You then create a salt-cloud profile for each location you define. Creating a separate profile for each location allows you to define separate grain data for each location.
+
+When defining locations, you must match the following items:
+
+| Pillar | Grains |
+| webpagetest.locations.name | wpt_location |
+| webpagetest.locations.label | wpt_label |
+| webpagetest.locations.group | wpt_group |
+| webpagetest.locations.browsers | wpt_browsers |
