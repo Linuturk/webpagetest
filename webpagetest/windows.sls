@@ -84,6 +84,11 @@ schedule-wptdriver:
     - source: salt://webpagetest/files/wptdriver.ini
     - template: jinja
 
+'{{ pillar['webpagetest']['win']['install_dir'] }}\agent\urlBlast.ini':
+  file.managed:
+    - source: salt://webpagetest/files/urlBlast.ini
+    - template: jinja
+
 install-mindinst:
   file.managed:
     - name: {{ pillar['webpagetest']['win']['install_dir'] }}\mindinst.exe
