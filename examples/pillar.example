@@ -38,5 +38,5 @@ webpagetest:
       browsers: "Chrome,Firefox,IE"
       drivers:
         - wptdriver
-        - urlBlast
+        - urlblast
       default: True
