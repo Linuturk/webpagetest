@@ -27,3 +27,7 @@ When defining locations, you must match the following items:
 | webpagetest.locations.label | wpt_label |
 | webpagetest.locations.group | wpt_group |
 | webpagetest.locations.browsers | wpt_browsers |
+
+## Manual Post Setup Steps
+
+1. Launch IE on each server, and click through to enable the Browser Helper Object. Otherwise, your IE tests will fail.
