@@ -16,6 +16,12 @@ disable-screensaver:
     - shell: powershell
     - stateful: True
 
+disable-monitor-timeout:
+  cmd.script:
+    - source: salt://webpagetest/powershell/Set-MonitorTimeout.ps1
+    - shell: powershell
+    - stateful: True
+
 disable-shutdown-tracker:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-DisableShutdownTracker.ps1
