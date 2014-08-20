@@ -1,6 +1,6 @@
 $CurrentState = Get-ScheduledTask -TaskName "ServerManager" | Select-String -pattern "Ready"
 
-If ($CurrentState) {
+If ($CurrentState -like "*Ready*") {
   Get-ScheduledTask -TaskName "ServerManager" | Disable-ScheduledTask
   Write-Output "changed=yes comment='Server Manager disabled at logon.'"
 } Else {
