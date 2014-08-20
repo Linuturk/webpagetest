@@ -1,5 +1,5 @@
 $LogonPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
-$Username = "{{ grains.host }}\{{ pillar['webpagetest']['win']['user'] }}"
+$Username = "{{ pillar['webpagetest']['win']['user'] }}"
 $Password = "{{ pillar['webpagetest']['win']['pass'] }}"
 
 $CurrentVal = Get-ItemProperty -Path $LogonPath -Name AutoAdminLogon
@@ -19,6 +19,6 @@ If ($CurrentVal.AutoAdminLogon -eq 1) {
   Set-ItemProperty -Path $LogonPath -Name AutoAdminLogon -Value 1
   New-ItemProperty -Path $LogonPath -Name DefaultUserName -Value "$Username"
   New-ItemProperty -Path $LogonPath -Name DefaultPassword -Value "$Password"
-  Remove-ItemProperty -Path $LogonPath -Name AutoLogonCount
+  Set-ItemProperty -Path $LogonPath -Name DontDisplayLastUserName -Value 1
   Write-Output "changed=yes comment='AutoLogon enabled.'"
 }
