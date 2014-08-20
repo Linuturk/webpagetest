@@ -30,4 +30,5 @@ When defining locations, you must match the following items:
 
 ## Manual Post Setup Steps
 
+1. Dismiss the Network Discovery panel.
 1. Launch IE on each server, and click through to enable the Browser Helper Object. Otherwise, your IE tests will fail.
