@@ -41,6 +41,12 @@ create-user:
     - stateful: True
     - template: jinja
 
+disable-server-manager:
+  cmd.script:
+    - source: salt://webpagetest/powershell/Set-DisableServerManager.ps1
+    - shell: powershell
+    - stateful: True
+
 set-auto-logon:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-AutoLogon.ps1
