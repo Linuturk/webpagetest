@@ -19,6 +19,6 @@ If ($CurrentVal.AutoAdminLogon -eq 1) {
   Set-ItemProperty -Path $LogonPath -Name AutoAdminLogon -Value 1
   New-ItemProperty -Path $LogonPath -Name DefaultUserName -Value "$Username"
   New-ItemProperty -Path $LogonPath -Name DefaultPassword -Value "$Password"
-  Set-ItemProperty -Path $LogonPath -Name DontDisplayLastUserName -Value 1
+  New-ItemProperty -Path $LogonPath -Name DontDisplayLastUserName -Value 1
   Write-Output "changed=yes comment='AutoLogon enabled.'"
 }
