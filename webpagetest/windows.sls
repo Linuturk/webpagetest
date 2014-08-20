@@ -34,18 +34,18 @@ disable-uac:
     - shell: powershell
     - stateful: True
 
+disable-server-manager:
+  cmd.script:
+    - source: salt://webpagetest/powershell/Set-DisableServerManager.ps1
+    - shell: powershell
+    - stateful: True
+
 create-user:
   cmd.script:
     - source: salt://webpagetest/powershell/Set-WebPageTestUser.ps1
     - shell: powershell
     - stateful: True
     - template: jinja
-
-disable-server-manager:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-DisableServerManager.ps1
-    - shell: powershell
-    - stateful: True
 
 set-auto-logon:
   cmd.script:
