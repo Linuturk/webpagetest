@@ -1,4 +1,5 @@
 $LogonPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+$LastUser = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI'
 $Username = "{{ pillar['webpagetest']['win']['user'] }}"
 $Password = "{{ pillar['webpagetest']['win']['pass'] }}"
 
@@ -20,5 +21,6 @@ If ($CurrentVal.AutoAdminLogon -eq 1) {
   New-ItemProperty -Path $LogonPath -Name DefaultUserName -Value "$Username"
   New-ItemProperty -Path $LogonPath -Name DefaultPassword -Value "$Password"
   New-ItemProperty -Path $LogonPath -Name DontDisplayLastUserName -Value 1
+  Set-ItemProperty -Path $LastUser -Name LastLoggedOnUser -Value "$Username"
   Write-Output "changed=yes comment='AutoLogon enabled.'"
 }
