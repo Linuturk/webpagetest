@@ -6,7 +6,7 @@ $Password = "{{ pillar['webpagetest']['win']['pass'] }}"
 
 $CurrentVal = Get-ItemProperty -Path $LogonPath -Name AutoAdminLogon
 
-If ($CurrentVal.AutoAdminLogon -eq 1) {
+If ($CurrentVal.AutoAdminLogon -eq "1") {
   $CurrentUser = Get-ItemProperty -Path $LogonPath -Name DefaultUserName
   $CurrentPass = Get-ItemProperty -Path $LogonPath -Name DefaultPassword
 
@@ -18,7 +18,7 @@ If ($CurrentVal.AutoAdminLogon -eq 1) {
     Write-Output "changed=no comment='AutoLogon already enabled.'"
   }
 } Else {
-  Set-ItemProperty -Path $LogonPath -Name AutoAdminLogon -Value 1
+  Set-ItemProperty -Path $LogonPath -Name AutoAdminLogon -Value "1"
   Set-ItemProperty -Path $LogonPath -Name DefaultDomainName -Value "$Domain"
   New-ItemProperty -Path $LogonPath -Name DefaultUserName -Value "$Username"
   New-ItemProperty -Path $LogonPath -Name DefaultPassword -Value "$Password"
