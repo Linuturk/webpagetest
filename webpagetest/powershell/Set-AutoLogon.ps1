@@ -1,5 +1,6 @@
 $LogonPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
 $LastUser = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI'
+$Domain = "{{ grains.host }}"
 $Username = "{{ pillar['webpagetest']['win']['user'] }}"
 $Password = "{{ pillar['webpagetest']['win']['pass'] }}"
 
@@ -18,6 +19,7 @@ If ($CurrentVal.AutoAdminLogon -eq 1) {
   }
 } Else {
   Set-ItemProperty -Path $LogonPath -Name AutoAdminLogon -Value 1
+  Set-ItemProperty -Path $LogonPath -Name DefaultDomainName -Value "$Domain"
   New-ItemProperty -Path $LogonPath -Name DefaultUserName -Value "$Username"
   New-ItemProperty -Path $LogonPath -Name DefaultPassword -Value "$Password"
   New-ItemProperty -Path $LogonPath -Name DontDisplayLastUserName -Value 1
