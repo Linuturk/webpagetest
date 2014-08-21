@@ -7,14 +7,16 @@ if ($testsigning) {
   Write-Output "changed=yes comment='Test Signing Enabled.'"
 }
 
-$dummynet = Get-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet
+$Interface = Get-NetAdapter -Name pub*
+$InstallDir = {{ pillar['webpagetest']['win']['install_dir'] }}
+$dummynet = Get-NetAdapterBinding -Name $Interface.Name -DisplayName ipfw+dummynet
 
 If ($dummynet.Enabled) {
-  Write-Output "changed=no comment='ipfw+dummynet binding on the private network adapter is already enabled.'"
+  Write-Output "changed=no comment='ipfw+dummynet binding is already enabled.'"
 } Else {
-  Import-Certificate -FilePath C:\webpagetest\WPOFoundation.cer -CertStoreLocation Cert:\LocalMachine\TrustedPublisher
-  cd C:\webpagetest
-  .\mindinst.exe c:\webpagetest\agent\dummynet\64bit\netipfw.inf -i -s
-  Enable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet
-  Write-Output "changed=yes comment='Enabled ipfw+dummynet binding on the private network adapter.'"
+  Import-Certificate -FilePath $InstallDir\WPOFoundation.cer -CertStoreLocation Cert:\LocalMachine\TrustedPublisher
+  cd $InstallDir
+  .\mindinst.exe $InstallDir\agent\dummynet\64bit\netipfw.inf -i -s
+  Enable-NetAdapterBinding -Name $Interface.Name -DisplayName ipfw+dummynet
+  Write-Output "changed=yes comment='Enabled ipfw+dummynet binding.'"
 }
