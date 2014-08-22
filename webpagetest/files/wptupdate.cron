@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script downloads and extracts the most recent wpt updates to the work folder.
 
-$UPDATEDIR="/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/work/update/"
+/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/work/update/
 
 rm /tmp/update.zip
 rm /tmp/wptupdate.zip
@@ -9,10 +9,10 @@ rm /tmp/wptupdate.zip
 wget -P /tmp http://www.webpagetest.org/work/update/update.zip
 wget -P /tmp http://www.webpagetest.org/work/update/wptupdate.zip
 
-unzip -o /tmp/update.zip update.ini -d "$UPDATEDIR"
-unzip -o /tmp/wptupdate.zip wptupdate.ini -d "$UPDATEDIR"
+unzip -o /tmp/update.zip update.ini -d /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/work/update/
+unzip -o /tmp/wptupdate.zip wptupdate.ini -d /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/work/update/
 
-cp /tmp/update.zip '$UPDATEDIR'
-cp /tmp/wptupdate.zip '$UPDATEDIR'
+cp /tmp/update.zip /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/work/update/
+cp /tmp/wptupdate.zip /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/work/update/
 
-chown -R www-data:www-data '$UPDATEDIR'
+chown -R www-data:www-data /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/work/update/
