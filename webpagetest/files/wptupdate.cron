@@ -12,7 +12,7 @@ wget -P /tmp http://www.webpagetest.org/work/update/wptupdate.zip
 unzip -o /tmp/update.zip update.ini -d "$UPDATEDIR"
 unzip -o /tmp/wptupdate.zip wptupdate.ini -d "$UPDATEDIR"
 
-cp /tmp/update.zip "$UPDATEDIR"
-cp /tmp/wptupdate.zip "$UPDATEDIR"
+cp /tmp/update.zip '$UPDATEDIR'
+cp /tmp/wptupdate.zip '$UPDATEDIR'
 
-chown -R www-data:www-data "$UPDATEDIR"
+chown -R www-data:www-data '$UPDATEDIR'
