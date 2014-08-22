@@ -11,12 +11,8 @@ if ($GetTask) {
   $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
   $T = New-ScheduledTaskTrigger -AtLogon -User $User
   $S = New-ScheduledTaskSettingsSet
-  $U = "$ThisHost\$User"
-  $P = $Password
-  $D = New-ScheduledTask -Action $A  -Trigger $T -Settings $S
-  Register-ScheduledTask -TaskName "wptdriver" -InputObject $D -User $U -Password $P
-  $Principal = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
-  Register-ScheduledTask -TaskName "wptdriver2" -Action $A -Trigger $T -Setting $S -Principal $Principal
+  $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
+  Register-ScheduledTask -TaskName "wptdriver" -Action $A -Trigger $T -Setting $S -Principal $P
   Write-Output "changed=yes comment='Task (wptdriver) scheduled.'"
 }
 
@@ -28,9 +24,7 @@ if ($GetTask) {
   $A = New-ScheduledTaskAction -Execute "$InstallDir\urlBlast.exe"
   $T = New-ScheduledTaskTrigger -AtLogon -User $User
   $S = New-ScheduledTaskSettingsSet
-  $U = "$ThisHost\$User"
-  $P = $Password
-  $D = New-ScheduledTask -Action $A  -Trigger $T -Settings $S
-  Register-ScheduledTask -TaskName "urlBlast" -InputObject $D -User $U -Password $P
+  $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
+  Register-ScheduledTask -TaskName "urlBlast" -Action $A -Trigger $T -Setting $S -Principal $P
   Write-Output "changed=yes comment='Task (urlBlast) scheduled.'"
 }
