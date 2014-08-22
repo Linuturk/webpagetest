@@ -8,7 +8,7 @@ if ($testsigning) {
 }
 
 $Interface = Get-NetAdapter -Name pub*
-$InstallDir = {{ pillar['webpagetest']['win']['install_dir'] }}
+$InstallDir = "{{ pillar['webpagetest']['win']['install_dir'] }}"
 $dummynet = Get-NetAdapterBinding -Name $Interface.Name -DisplayName ipfw+dummynet
 
 If ($dummynet.Enabled) {
