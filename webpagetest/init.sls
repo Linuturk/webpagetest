@@ -35,6 +35,14 @@ httpservices:
     - require_in:
       - mount: mount-tmpfs
 
+/etc/cron.daily/wptupdate:
+  file.managed:
+    - source: salt://webpagetest/files/wptupdate.cron
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: 755
+
 include:
   - webpagetest.{{ pillar['webpagetest']['http'] }}
 
