@@ -9,7 +9,7 @@ if ($GetTask) {
   Write-Output "changed=no comment='Task (wptdriver) already scheduled.'"
 } Else {
   $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
-  $T = New-ScheduledTaskTrigger -AtLogon
+  $T = New-ScheduledTaskTrigger -AtLogon -User $User
   $S = New-ScheduledTaskSettingsSet
   $U = "$ThisHost\$User"
   $P = $Password
@@ -24,7 +24,7 @@ if ($GetTask) {
   Write-Output "changed=no comment='Task (urlBlast) already scheduled.'"
 } Else {
   $A = New-ScheduledTaskAction -Execute "$InstallDir\urlBlast.exe"
-  $T = New-ScheduledTaskTrigger -AtLogon
+  $T = New-ScheduledTaskTrigger -AtLogon -User $User
   $S = New-ScheduledTaskSettingsSet
   $U = "$ThisHost\$User"
   $P = $Password
