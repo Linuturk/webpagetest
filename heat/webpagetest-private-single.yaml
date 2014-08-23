@@ -1,8 +1,8 @@
 heat_template_version: 2013-05-23
 
 description: |
-  HEAT template for setting up a private instance WebPageTest on a single
-  Windows Server.
+  HEAT template for setting up a private instance of WebPageTest on a single Windows
+  Server
 
 parameter_groups:
 
@@ -10,6 +10,12 @@ parameter_groups:
   parameters:
   - image
   - flavor
+
+- label: ASP .Net Application Settings
+  parameters:
+  - domain
+  - ftp_username
+  - aspdotnet_version
 
 - label: rax-dev-params
   parameters:
@@ -22,7 +28,7 @@ parameters:
     label: Server Hostname
     description: Hostname to use for the server that's built.
     type: string
-    default: WebPageTest
+    default: ASPdotNet
     description: Windows Server Name
 
   image:
@@ -53,6 +59,33 @@ parameters:
       - 30 GB Performance
       description: must be a valid Rackspace Cloud Server flavor.
 
+  # ASP .Net settings
+  domain:
+    label: Site Domain
+    description: Domain to be used with the ASP .net site
+    type: string
+    default: "example.com"
+    constraints:
+    - allowed_pattern: "^[a-zA-Z0-9.-]{1,255}.[a-zA-Z]{2,15}$"
+      description: Must be a valid domain name
+
+  ftp_username:
+    label: FTP Username
+    description: |
+      FTP Username for the site. A password will be randomly generated for this
+      account.
+    type: string
+    default: "ftp_user"
+    constraints:
+    - allowed_pattern: "^(?!^root$)([a-z0-9_]{1,16})$"
+      description: Must be a valid username
+
+  aspdotnet_version:
+    label: ASP .Net Version
+    description: Version of ASP .Net to install (4.5.1 includes 3.5 and 4.0)
+    type: string
+    default: 4.5.1
+
 resources:
 
   rs_windows_server:
@@ -65,38 +98,389 @@ resources:
       user_data:
         str_replace:
           template: |
+            #region Deployment of IIS, FTP and ASP .Net Site
+            Function Deploy-AspdotNet(){
+                [CmdletBinding()]
+                Param(
+                    [String]$DomainName = "example.com",
+                    [String]$FtpUserName = "ftpuser01",
+                    [String]$FtpPassword = "Passw0rd",
+                    [String]$Logfile = "C:\Windows\Temp\Deploy-AspdotNet.log"
+                )
+                Set-Content .\super.txt $FtpPassword
+                #region Create Log File
+                    if (!( Test-Path $Logfile)){
+                        New-Item -Path "C:\Windows\Temp\Deploy-AspdotNet.log" -ItemType file
+                    }
+                    #endregion
+                #region Write Log file
+                Function WriteLog{
+                    Param ([string]$logstring)
+                    Add-content $Logfile -value $logstring
+                }
+                #endregion
+                #region Variables
+                $webRoot = "$env:systemdrive\inetpub\wwwroot\"
+                $webFolder = $webRoot + $DomainName
+                $appPoolName = $DomainName
+                $siteName = $DomainName
+                $ftpName = "ftp_" + $DomainName
+                $appPoolIdentity = "IIS AppPool\$appPoolName"
+                #endregion
+                #region Create Automation Login
+                Function Create-User($User,$Password) {
+                  try{
+                      if($Password -match $null){
+                          Write-Host "[$(Get-Date)] Error: wffadmin is set with the password $Password"
+                      }
+                      $hostname = $env:ComputerName
+                      $objComputer = [ADSI]("WinNT://$hostname,computer")
+                      $colUsers = ($objComputer.psbase.children |
+                          Where-Object {$_.psBase.schemaClassName -eq "User"} |
+                              Select-Object -expand Name)
+                      if($colUsers -contains $User){
+                          ([ADSI]("WinNT://$hostname/$User")).SetPassword($Password)
+                          WMIC USERACCOUNT WHERE "Name='$User'" SET PasswordExpires=FALSE >$null
+                          Write-Host "[$(Get-Date)] Status: Completed $user update with password $Password"
+                      }
+                      else {
+                          net user /add $User $Password /expires:never /passwordchg:no /comment:"Automation" > $null
+                          WMIC USERACCOUNT WHERE "Name='$User'" SET PasswordExpires=FALSE > $null
+                          net localgroup administrators $User /add > $null
+                          Write-Host "[$(Get-Date)] Status: Completed $user creation with password $Password"
+                          #return $Password
+                      }
+                  }
+                  catch [Exception] {
+                      Write-Host "[$(Get-Date)] Error: $_"
+                      return
+                  }
+              }
+                #endregion
+                #region Install IIS and ASP
+                Function Install-AspWebServer (){
+                Write-Host "[$(Get-Date)] Installing IIS and ASP .Net"
+                Import-Module servermanager
+                Add-WindowsFeature Web-Server,Web-WebServer,Web-Common-Http,Web-Default-Doc,Web-Dir-Browsing,Web-Http-Errors,Web-Static-Content,Web-Http-Redirect,Web-Health,Web-Http-Logging,Web-Custom-Logging,Web-Log-Libraries,Web-ODBC-Logging,Web-Request-Monitor,Web-Http-Tracing,Web-Performance,Web-Stat-Compression,Web-Dyn-Compression,Web-Security,Web-Filtering,Web-Basic-Auth,Web-CertProvider,Web-Client-Auth,Web-Digest-Auth,Web-Cert-Auth,Web-IP-Security,Web-Url-Auth,Web-Windows-Auth,Web-App-Dev,Web-Net-Ext,Web-Net-Ext45,Web-AppInit,Web-ASP,Web-Asp-Net,Web-Asp-Net45,Web-CGI,Web-ISAPI-Ext,Web-ISAPI-Filter,Web-Includes,Web-WebSockets,Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Web-Lgcy-Mgmt-Console,Web-Scripting-Tools > $null
+              }
+                #endregion
+                #region Install FTP
+                Function Install-FTPserver () {
+                    Import-Module ServerManager
+                    $out = Add-WindowsFeature -Name Web-Ftp-Server -IncludeAllSubFeature
+                    if ($out.ExitCode -eq "NoChangeNeeded"){
+                        Write-Host "[$(Get-Date)] FTP server is already installed"
+                    }
+                    else {
+                        Write-Host "[$(Get-Date)] FTP Server and dependencies have been installed"
+                    }
+                }
+                #endregion
+                #region Create A Website in IIS
+                Function Create-Website ($webSiteName, $webSiteFolder, $webAppPoolName){
+                try{
+                  Write-Host "[$(Get-Date)] Creating the $webSiteName"
+                  New-Item $webSiteFolder -type directory -Force >$null
+                  Stop-Website -Name 'Default Web Site'
+                  New-WebAppPool $webAppPoolName > $null
+                  New-Website -Name $webSiteName -Port 80 -IPAddress "*" -HostHeader $webSiteName -PhysicalPath $webSiteFolder -ApplicationPool $webAppPoolName -Force > $null
+                }
+                catch{
+                  throw "Error : $_"
+                }
+              }
+                #endregion
+                #region Remove a Website in IIS
+                Function Remove-Website($webAppPoolName, $webSiteFolder, $webSiteName){
+                try{
+                if($webSiteFolder -ne $null){
+                  if((Test-Path -PathType Container -path $webSiteFolder)){
+                    $siteStatus = get-website -Name $webSiteName
+                    $siteAppPoolStatus = Get-Item "IIS:\AppPools\$webSiteName"
+                    if((Get-WebsiteState -Name "$webSiteName").Value -ne "Stopped") {
+                      $siteStatus.Stop()
+                    }
+                    if((Get-WebAppPoolState -Name $webAppPoolName).Value -ne "Stopped") {
+                      $siteAppPoolStatus.Stop()
+                    }
+                    Write-Host "[$(Get-Date)] Removing the Web site $webSiteName"
+                    Remove-Website -Name $webSiteName
+                    Write-Host "[$(Get-Date)] Removing the Application pool $webAppPoolName"
+                    Remove-WebAppPool -Name $webAppPoolName
+                    Write-Host "[$(Get-Date)] Removing the Site Directory if $webAppPoolName"
+                    Remove-Item $webSiteFolder -Recurse -Force
+                  }
+                  else{
+                    Write-Host "[$(Get-Date)] The site $webSiteName is not present"
+                  }
+                }
+                }
+                catch{
+                    throw "Error : $_"
+                }
+              }
+                #endregion
+                #region Create a FTP site
+                Function Create-FtpSite($DefaultFtpSiteName,$DefaultFtpUser,$DefaultFtpPassword){
+                function New-SelfSignedCert{
+                    [CmdletBinding()]
+                    [OutputType([int])]
+                    Param
+                    (
+                        [Parameter(Mandatory=$true,
+                                   ValueFromPipeLine=$true,
+                                   Position=0)]
+                        [string[]]$Subject = "demo.demo.com"
+                        ,
+                        [Parameter(Mandatory=$true,
+                                   ValueFromPipelineByPropertyName=$true,
+                                   Position=1)]
+                        [ValidateSet("User","Computer")]
+                        [string]$CertStore = "Computer"
+                        ,
+                        [ValidateSet("Y","N")]
+                        [string]$EKU_ServerAuth =  "Y"
+                        ,
+                        [ValidateSet("Y","N")]
+                        [string]$EKU_ClientAuth =  "Y"
+                        ,
+                        [ValidateSet("Y","N")]
+                        [string]$EKU_SmartCardAuth =  "Y"
+                        ,
+                        [ValidateSet("Y","N")]
+                        [string]$EKU_EncryptFileSystem =  "Y"
+                        ,
+                        [ValidateSet("Y","N")]
+                        [string]$EKU_CodeSigning =  "Y"
+                        ,
+                        [ValidateSet("Y","N")]
+                        [string]$AsTrustedRootCert =  "N"
+                    )
+                    Begin{
+                        $ErrorActionPreference = "SilentlyContinue"
+                        If ($CertStore -eq "User"){
+                            $machineContext = 0
+                            $initContext = 1
+                        }
+                        ElseIF ($CertStore -eq "Computer"){
+                            $machineContext = 1
+                            $initContext = 2
+                        }
+                        Else{
+                            Write-Error "Invalid selection"
+                            Exit
+                        }
+                    }
+                    Process{
+                        $OS = (Get-WmiObject Win32_OperatingSystem).Version
+                        if ($OS[0] -ge 6) {
+                            foreach ($sub in $Subject){
+                                #Generate cert in local computer My store
+                                $name = new-object -com "X509Enrollment.CX500DistinguishedName.1"
+                                $name.Encode("CN=$sub", 0)
+                                $key = new-object -com "X509Enrollment.CX509PrivateKey.1"
+                                $key.ProviderName = "Microsoft RSA SChannel Cryptographic Provider"
+                                $key.KeySpec = 1
+                                $key.Length = 2048
+                                $key.SecurityDescriptor = "D:PAI(A;;0xd01f01ff;;;SY)(A;;0xd01f01ff;;;BA)(A;;0x80120089;;;NS)"
+                                $key.MachineContext = $machineContext
+                                $key.ExportPolicy = 1
+                                $key.Create()
+                                $ekuoids = new-object -com "X509Enrollment.CObjectIds.1"
+                                #Enhanced Key Usage `(EKU`) by answering Y/N
+                                If ($EKU_ServerAuth -eq "Y"){
+                                $serverauthoid = new-object -com "X509Enrollment.CObjectId.1"
+                                $serverauthoid.InitializeFromValue("1.3.6.1.5.5.7.3.1")
+                                $ekuoids.add($serverauthoid)
+                                }
+                                If ($EKU_ClientAuth -eq "Y"){
+                                $clientauthoid = new-object -com "X509Enrollment.CObjectId.1"
+                                $clientauthoid.InitializeFromValue("1.3.6.1.5.5.7.3.2")
+                                $ekuoids.add($clientauthoid)
+                                }
+                                If ($EKU_SmartCardAuth -eq "Y"){
+                                $smartcardoid = new-object -com "X509Enrollment.CObjectId.1"
+                                $smartcardoid.InitializeFromValue("1.3.6.1.4.1.311.20.2.2")
+                                $ekuoids.add($smartcardoid)
+                                }
+                                If ($EKU_EncryptFileSystem -eq "Y"){
+                                $efsoid = new-object -com "X509Enrollment.CObjectId.1"
+                                $efsoid.InitializeFromValue("1.3.6.1.4.1.311.10.3.4")
+                                $ekuoids.add($efsoid)
+                                }
+                                If ($EKU_CodeSigning -eq "Y"){
+                                $codesigningoid = new-object -com "X509Enrollment.CObjectId.1"
+                                $codesigningoid.InitializeFromValue("1.3.6.1.5.5.7.3.3")
+                                $ekuoids.add($codesigningoid)
+                                }
+                                $ekuext = new-object -com "X509Enrollment.CX509ExtensionEnhancedKeyUsage.1"
+                                $ekuext.InitializeEncode($ekuoids)
+                                $cert = new-object -com "X509Enrollment.CX509CertificateRequestCertificate.1"
+                                $cert.InitializeFromPrivateKey($initContext, $key, "")
+                                $cert.Subject = $name
+                                $cert.Issuer = $cert.Subject
+                                $cert.NotBefore = get-date
+                                $cert.NotAfter = $cert.NotBefore.AddDays(3650)
+                                $cert.X509Extensions.Add($ekuext)
+                                $cert.Encode()
+                                $enrollment = new-object -com "X509Enrollment.CX509Enrollment.1"
+                                $enrollment.InitializeFromRequest($cert)
+                                $certdata = $enrollment.CreateRequest(1)
+                                $enrollment.InstallResponse(2, $certdata, 1, "")
+                                Write-Verbose "$($sub) has been added the Certificate to the Store $($CertStore)"
+                                #Install the certificate to Trusted Root Certification Authorities
+                                if ($AsTrustedRootCert -eq "Y") {
+                                    [Byte[]]$bytes = [System.Convert]::FromBase64String($certdata)
+                                    foreach ($Store in "Root", "TrustedPublisher") {
+                                        $x509store = New-Object Security.Cryptography.X509Certificates.X509Store $Store, "LocalMachine"
+                                        $x509store.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+                                        $x509store.Add([Security.Cryptography.X509Certificates.X509Certificate2]$bytes)
+                                        $x509store.Close()
+                                    }
+                                }
+                                Write-Verbose "$($sub) has been added the Certificate to the Store $($Store)"
+                            }
+                        }
+                        else{
+                            Write-Warning "The Operating System must be at LEAST Windows Server 2008"
+                        }
+                    }
+                    End{
+                    Write-Host "Completed :: New Certificate(s) Created and Installed" -ForegroundColor Green
+                    Write-Verbose "Execution finished..."
+                    }
+                }
+                Import-Module WebAdministration
+                $DefaultFtpPath = "c:\inetpub\wwwroot\"
+                $DefaultNonSecureFtpPort = 21
+                # Create FTP user Account
+                net user /add $DefaultFtpUser $DefaultFtpPassword > $null
+                Write-Host "[$(Get-Date)] Completed '$DefaultFtpUser' creation"
+                New-WebFtpSite -Name $DefaultFtpSiteName -PhysicalPath $DefaultFtpPath -Port $DefaultNonSecureFtpPort -IPAddress * > $null
+                # Apply permissions to wwwroot Folder
+                $acl = (Get-Item $DefaultFtpPath).GetAccessControl("Access")
+                $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($DefaultFtpUser,"Modify","ContainerInherit, ObjectInherit","None","Allow")
+                $acl.AddAccessRule($rule)
+                Set-Acl $DefaultFtpPath $acl
+                # Configure IIS Site Properties
+                Set-ItemProperty IIS:\Sites\$DefaultFtpSiteName -Name ftpServer.security.ssl.controlChannelPolicy -Value 0
+                Set-ItemProperty IIS:\Sites\$DefaultFtpSiteName -Name ftpServer.security.ssl.dataChannelPolicy -Value 0
+                Set-ItemProperty IIS:\Sites\$DefaultFtpSiteName -Name ftpServer.security.ssl.ssl128 -Value $true
+                Set-ItemProperty IIS:\Sites\$DefaultFtpSiteName -Name ftpServer.security.authentication.basicAuthentication.enabled -Value $true
+                # Alter FTPServer Configuration
+                # Add Allow rule for our ftpGroup (Permission=3 ==> Read+Write)
+                Add-WebConfiguration "/system.ftpServer/security/authorization" -value @{accessType="Allow"; users=$DefaultFtpUser; permissions=3} -PSPath IIS:\ -location $DefaultFtpSiteName
+                # Change the lower and upper dataChannel ports
+                $firewallSupport = Get-WebConfiguration system.ftpServer/firewallSupport
+                $firewallSupport.lowDataChannelPort = 5001
+                $firewallSupport.highDataChannelPort = 5050
+                $firewallSupport | Set-WebConfiguration system.ftpServer/firewallSupport
+                New-SelfSignedCert -Subject $DefaultFtpSiteName -CertStore Computer -EKU_ServerAuth Y -EKU_ClientAuth Y -EKU_SmartCardAuth Y -EKU_EncryptFileSystem Y -EKU_CodeSigning Y -AsTrustedRootCert Y > $null
+                cd Microsoft.PowerShell.Security\Certificate::localmachine\my
+                $cert = Get-ChildItem | Where-Object {$_.subject -match $DefaultFtpSiteName } | select thumbprint | foreach { $_.thumbprint }
+                Set-ItemProperty IIS:\Sites\$DefaultFtpSiteName -Name ftpServer.security.ssl.serverCertHash -Value $cert
+                Write-Host "[$(Get-Date)] FTP Certificate $cert"
+                Write-Host "[$(Get-Date)] Completed $DefaultFtpSiteName creation"
+                netsh advfirewall set global StatefulFTP disable > $null
+                Write-Host "[$(Get-Date)] Stateful FTP is disabled"
+                Write-Host "[$(Get-Date)] Restart FTP service"
+                Restart-Service ftpsvc > $null
+                cd c:\
+            }
+                #endregion
+                #region Enable HTTP and HTTPS ports
+                Function Enable-WebServerFirewall(){
+                write-host "[$(Get-Date)] Enabling port 80"
+                netsh advfirewall firewall set rule group="World Wide Web Services (HTTP)" new enable=yes > $null
+                write-host "[$(Get-Date)] Enabling port 443"
+                netsh advfirewall firewall set rule group="Secure World Wide Web Services (HTTPS)" new enable=yes > $null
+              }
+                #endregion
+                #region Clean Deployment
+                Function Clean-Deployment{
+                    #region Remove Automation initial firewall rule opener
+                    if((Test-Path -Path 'C:\Cloud-Automation')){
+                        Remove-Item -Path 'C:\Cloud-Automation' -Recurse > $null
+                    }
+                    #endregion
+                    #region Schedule Task to remove the Psexec firewall rule
+                    $DeletePsexec = {
+                        Remove-Item $MyINvocation.InvocationName
+                        $find_rule = netsh advfirewall firewall show rule "PSexec Port"
+                        if ($find_rule -notcontains 'No rules match the specified criteria.') {
+                            Write-Host "Deleting firewall rule"
+                            netsh advfirewall firewall delete rule name="PSexec Port" > $null
+                        }
+                    }
+                    $Cleaner = "C:\Windows\Temp\cleanup.ps1"
+                    Set-Content $Cleaner $DeletePsexec
+                    $ST_Username = "autoadmin"
+                    net user /add $ST_Username $FtpPassword
+                    net localgroup administrators $ST_Username /add
+                    $ST_Exec = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+                    $ST_Arg = "-NoLogo -NonInteractive -WindowStyle Hidden -ExecutionPolicy ByPass C:\Windows\Temp\cleanup.ps1"
+                    $ST_A_Deploy_Cleaner = New-ScheduledTaskAction -Execute $ST_Exec -Argument $ST_Arg
+                    $ST_T_Deploy_Cleaner = New-ScheduledTaskTrigger -Once -At ((Get-date).AddMinutes(2))
+                    $ST_S_Deploy_Cleaner = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun -DontStopIfGoingOnBatteries -StartWhenAvailable -MultipleInstances Parallel
+                    #$ST_ST_Deploy_Cleaner = New-ScheduledTask -Action $ST_A_Deploy_Cleaner -Trigger $ST_T_Deploy_Cleaner -Settings $ST_S_Deploy_Cleaner
+                    Register-ScheduledTask -TaskName "Clean Automation" -TaskPath \ -RunLevel Highest -Action $ST_A_Deploy_Cleaner -Trigger $ST_T_Deploy_Cleaner -Settings $ST_S_Deploy_Cleaner -User $ST_Username -Password $FtpPassword *>> $Logfile
+                    #endregion
+                }
+                #endregion
+                #region MAIN
+                Install-AspWebServer
+                Install-FTPserver
+                Create-Website -webSiteName $siteName -webSiteFolder $webFolder -webAppPoolName $appPoolName
+                Set-Content .\super.txt "$FtpPassword"
+                Create-FtpSite -DefaultFtpSiteName $ftpName -DefaultFtpUser $FtpUserName -DefaultFtpPassword $FtpPassword
+                Enable-WebServerFirewall
+                Clean-Deployment
+                #endregion
+            #################################################################
             $wpt_zip_url =  "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/webpagetest_2.15.zip"
             $driver_installer_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/mindinst.exe"
-            $driver_installer_file = "mindinst.exe"
             $driver_installer_cert_url = "https://github.com/Linuturk/webpagetest/raw/master/webpagetest/powershell/WPOFoundation.cer"
+            $wpt_host =  $env:COMPUTERNAME
+            $wpt_user = "webpagetest"
+            $wpt_password = $FtpPassword
+            $wpt_zip_file = "webpagetest_2.15.zip"
+            $driver_installer_file = "mindinst.exe"
             $driver_installer_cert_file = "WPOFoundation.cer"
-            $wpt_agent_dir = "c:\wpt-agent"
-            $wpt_www_dir = "c:\wpt-www"
-            $wpt_temp_dir = 'C:\wpt-temp'
-            $wpt_user = "wptadmin"
-            $wpt_password = "GoBvnX5UqbOL"
-            New-Item $wpt_agent_dir -type directory -Force
-            New-Item $wpt_www_dir -type directory -Force
-            New-Item $wpt_temp_dir -type directory -Force
-            $wpt_zip_file = "$wpt_temp_dir\webpagetest_2.15.zip"
+                $wpt_agent_dir = "c:\wpt-agent"
+                $wpt_www_dir = "c:\wpt-www"
+                $wpt_temp_dir = "C:\wpt-temp"
+            function Set-WptFolders(){
+                $wpt_folders = @($wpt_agent_dir,$wpt_www_dir,$wpt_temp_dir)
+                foreach ($wpt_folder in $wpt_folders){
+                    New-Item $wpt_folder -type directory -Force
+                }
+            }
             function Download-File ($url, $localpath, $filename){
                 if(!(Test-Path -Path $localpath)){
-                    New-Item $localpath -type directory > $null
+                    New-Item $localpath -type directory -WhatIf
                 }
                 $webclient = New-Object System.Net.WebClient;
                 $webclient.DownloadFile($url, $localpath + "\" + $filename)
             }
+            function Unzip-File($fileName, $sourcePath, $destinationPath){
+                $shell = new-object -com shell.application
+                if (!(Test-Path "$sourcePath\$fileName")){
+                    throw "$sourcePath\$fileName does not exist"
+                }
+                New-Item -ItemType Directory -Force -Path $destinationPath -WarningAction SilentlyContinue
+                $shell.namespace($destinationPath).copyhere($shell.namespace("$sourcePath\$fileName").items())
+            }
             function Set-WebPageTestUser ($Username, $Password){
                 $Exists = [ADSI]::Exists("WinNT://./$Username")
                 if ($Exists) {
-                    Write-Output "$Username user already exists."
+                    Write-Output "[$(Get-Date)] $Username user already exists."
                 } Else {
                     net user /add $Username
                     net localgroup Administrators /add $Username
                     $user = [ADSI]("WinNT://./$Username")
                     $user.SetPassword($Password)
                     $user.SetInfo()
-                    Write-Output "$Username created."
+                    Write-Output "[$(Get-Date)] $Username created."
                 }
             }
             function Set-AutoLogon ($Username, $Password){
@@ -108,48 +492,48 @@ resources:
                     If ($CurrentUser.DefaultUserName -ne $Username -Or $CurrentPass.DefaultPassword -ne $Password) {
                         Set-ItemProperty -Path $LogonPath -Name DefaultUserName -Value $Username
                         Set-ItemProperty -Path $LogonPath -Name DefaultPassword -Value $Password
-                        Write-Output "Credentials Updated."
+                        Write-Output "[$(Get-Date)] Credentials Updated."
                     }Else {
-                        Write-Output "AutoLogon already enabled."
+                        Write-Output "[$(Get-Date)] AutoLogon already enabled."
                     }
                 }Else {
                     Set-ItemProperty -Path $LogonPath -Name AutoAdminLogon -Value 1
                     New-ItemProperty -Path $LogonPath -Name DefaultUserName -Value $Username
                     New-ItemProperty -Path $LogonPath -Name DefaultPassword -Value $Password
-                    Write-Output "AutoLogon enabled."
+                    Write-Output "[$(Get-Date)] AutoLogon enabled."
                 }
             }
             function Set-DisableServerManager (){
                 $CurrentState = Get-ScheduledTask -TaskName "ServerManager"
                 If ($CurrentState.State -eq "Ready") {
                     Get-ScheduledTask -TaskName "ServerManager" | Disable-ScheduledTask
-                    Write-Output "Server Manager disabled at logon."
+                    Write-Output "[$(Get-Date)] Server Manager disabled at logon."
                 } Else {
-                    Write-Output "Server Manager already disabled at logon."
+                    Write-Output "[$(Get-Date)] Server Manager already disabled at logon."
                 }
             }
             function Set-MonitorTimeout (){
                 $CurrentVal = POWERCFG /QUERY SCHEME_BALANCED SUB_VIDEO VIDEOIDLE | Select-String -pattern "Current AC Power Setting Index:"
                 If ($CurrentVal -like "*0x00000000*") {
-                    Write-Output "Display Timeout already set to Never."
+                    Write-Output "[$(Get-Date)] Display Timeout already set to Never."
                 } Else {
                     POWERCFG /CHANGE -monitor-timeout-ac 0
-                    Write-Output "Display Timeout set to Never."
+                    Write-Output "[$(Get-Date)] Display Timeout set to Never."
                 }
             }
             function Set-DisableScreensaver (){
                 $Path = 'HKCU:\Control Panel\Desktop'
                 Try {
                   $CurrentVal = Get-ItemProperty -Path $Path -Name ScreenSaveActive
-                  Write-Output $CurrentVal
+                  Write-Output "[$(Get-Date)] $CurrentVal"
                 } Catch {
                   $CurrentVal = False
                 } Finally {
                   if ($CurrentVal.ScreenSaveActive -ne 0) {
                     Set-ItemProperty -Path $Path -Name ScreenSaveActive -Value 0
-                    Write-Output "Screensaver Disabled."
+                    Write-Output "[$(Get-Date)] Screensaver Disabled."
                   } Else {
-                    Write-Output "Screensaver Already Disabled."
+                    Write-Output "[$(Get-Date)] Screensaver Already Disabled."
                   }
                 }
             }
@@ -157,10 +541,10 @@ resources:
                 $Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
                 $CurrentVal = Get-ItemProperty -Path $Path -Name ConsentPromptBehaviorAdmin
                 if ($CurrentVal.ConsentPromptBehaviorAdmin -ne 00000000) {
-                  Set-ItemProperty -Path $Path -Name "ConsentPromptBehaviorAdmin" -Value 00000000
-                  Write-Output "UAC Disabled."
+                    Set-ItemProperty -Path $Path -Name "ConsentPromptBehaviorAdmin" -Value 00000000
+                    Write-Output "[$(Get-Date)] UAC Disabled."
                 } Else {
-                  Write-Output "UAC Already Disabled."
+                    Write-Output "[$(Get-Date)] UAC Already Disabled."
                 }
             }
             function Set-DisableIESecurity (){
@@ -170,59 +554,47 @@ resources:
                 if ($CurrentVal.IsInstalled -ne 0) {
                     Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 0
                     Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 0
-                    Write-Output "IE ESC Disabled."
+                    Write-Output "[$(Get-Date)] IE ESC Disabled."
                 } Else {
-                    Write-Output "IE ESC Already Disabled."
+                    Write-Output "[$(Get-Date)] IE ESC Already Disabled."
                 }
             }
             function Set-StableClock (){
                 $useplatformclock = bcdedit | Select-String -pattern "useplatformclock        Yes"
                 if ($useplatformclock) {
-                    Write-Output "Platform Clock Already Enabled."
+                    Write-Output "[$(Get-Date)] Platform Clock Already Enabled."
                 } Else {
                     bcdedit /set  useplatformclock true
-                    Write-Output "Platform Clock Enabled."
+                    Write-Output "[$(Get-Date)] Platform Clock Enabled."
                 }
             }
             function Set-DisableShutdownTracker (){
                 $Path = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Reliability'
                 Try {
                     $CurrentVal = Get-ItemProperty -Path $Path -Name ShutdownReasonUI
-                    Write-Output $CurrentVal
+                    Write-Output "[$(Get-Date)] $CurrentVal"
                 } Catch {
                     $CurrentVal = False
                 } Finally {
                     if ($CurrentVal.ShutdownReasonUI -ne 0) {
                         New-ItemProperty -Path $Path -Name ShutdownReasonUI -Value 0
-                        Write-Output "Shutdown Tracker Disabled."
+                        Write-Output "[$(Get-Date)] Shutdown Tracker Disabled."
                     }Else{
-                        Write-Output "Shutdown Tracker Already Disabled."
+                        Write-Output "[$(Get-Date)] Shutdown Tracker Already Disabled."
                     }
                 }
             }
-            $webFolder = "C:\wpt-agent"
-            $fileSource = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/webpagetest_2.15.zip"
-            $tempFile = "$wpt_temp_dir\webpagetest_2.15.zip"
-            Function Set-WebPageTestInstall ($downloadLink, $downloadFolder,$webSiteFolder){
-              try{
-                Write-Output "[$(Get-Date)] Downloading Jabbr and unpacking it"
-                #Remove-Item $downLoadFolder -Recurse -Force
-                (New-Object System.Net.WebClient).DownloadFile($downloadLink, $downloadFolder )
-                $sh = New-Object -com shell.application; $sh.namespace($webSiteFolder).Copyhere($sh.namespace($downloadFolder ).items())
-              }
-              catch{
-                throw "Error : $_"
-              }
-              Copy-Item -Path C:\wpt-temp\agent\* -Destination C:\wpt-agent -Recurse -Force
-              Copy-Item -Path C:\wpt-temp\www\* -Destination C:\wpt-www -Recurse -Force
+            Function Set-WebPageTestInstall ($tempDir,$AgentDir,$wwwDir){
+                Copy-Item -Path $AgentDir\agent\* -Destination C:\wpt-agent -Recurse -Force
+                Copy-Item -Path $AgentDir\www\* -Destination C:\wpt-www -Recurse -Force
             }
             function Set-InstallAviSynth ($InstallDir){
                 $Installed = Test-Path "C:\Program Files (x86)\AviSynth 2.5" -pathType container
                 If ($Installed) {
-                    Write-Output "AviSynth already installed."
+                    Write-Output "[$(Get-Date)] AviSynth already installed."
                 } Else {
                     & "$InstallDir\Avisynth_258.exe" /S
-                    Write-Output "AviSynth installed."
+                    Write-Output "[$(Get-Date)] AviSynth installed."
                 }
             }
             function Set-InstallDummyNet ($InstallDir){
@@ -230,65 +602,69 @@ resources:
                 Download-File -url $driver_installer_cert_url -localpath $InstallDir -filename $driver_installer_cert_file
                 $testsigning = bcdedit | Select-String -pattern "testsigning Yes"
                 if ($testsigning) {
-                    Write-Output "Test Signing Already Enabled."
+                    Write-Output "[$(Get-Date)] Test Signing Already Enabled."
                 } Else {
                     bcdedit /set TESTSIGNING ON
-                    Write-Output "Test Signing Enabled."
+                    Write-Output "[$(Get-Date)] Test Signing Enabled."
                 }
-                $dummynet = Get-NetAdapterBinding -Name public0
+                $dummynet = Get-NetAdapterBinding -Name public*
                 if ($dummynet.ComponentID -eq "ipfw+dummynet"){
                     If ($dummynet.Enabled ) {
-                        Write-Output "ipfw+dummynet binding on the public network adapter is already enabled."
+                        Write-Output "[$(Get-Date)] ipfw+dummynet binding on the public network adapter is already enabled."
                     } Else {
                         Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet
                         Disable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet
                     }
                 }
                 else{
-                Write-Output $InstallDir\$driver_installer_cert_file
+                    Write-Output "[$(Get-Date)]  $InstallDir\$driver_installer_cert_file"
                     Import-Certificate -FilePath C:\wpt-agent\WPOFoundation.cer -CertStoreLocation Cert:\LocalMachine\TrustedPublisher
                     cd $InstallDir
                     .\mindinst.exe C:\wpt-agent\dummynet\64bit\netipfw.inf -i -s
                     Enable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet
-                    Write-Output "Enabled ipfw+dummynet binding on the private network adapter."
+                    Write-Output "[$(Get-Date)] Enabled ipfw+dummynet binding on the private network adapter."
                 }
             }
             function Set-WebPageTestScheduledTask ($ThisHost, $User,$InstallDir){
-            $GetTask = Get-ScheduledTask
-            if ($GetTask.TaskName -match "wptdriver") {
-              Write-Output "changed=no comment='Task (wptdriver) already scheduled.'"
-            } Else {
-              $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
-              $T = New-ScheduledTaskTrigger -AtLogon -User $User
-              $S = New-ScheduledTaskSettingsSet
-              Write-Output $ThisHost\$User
-              $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
-              Register-ScheduledTask -TaskName "wptdriver" -Action $A -Trigger $T -Setting $S -Principal $P
-              Write-Output "changed=yes comment='Task (wptdriver) scheduled.'"
-            }
-            $GetTask = Get-ScheduledTask
-            if ($GetTask.TaskName -match "urlBlast") {
-              Write-Output "changed=no comment='Task (urlBlast) already scheduled.'"
-            } Else {
-              $A = New-ScheduledTaskAction -Execute "$InstallDir\urlBlast.exe"
-              $T = New-ScheduledTaskTrigger -AtLogon -User $User
-              $S = New-ScheduledTaskSettingsSet
-              $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
-              Register-ScheduledTask -TaskName "urlBlast" -Action $A -Trigger $T -Setting $S -Principal $P
-              Write-Output "changed=yes comment='Task (urlBlast) scheduled.'"
-            }
+                $GetTask = Get-ScheduledTask
+                if ($GetTask.TaskName -match "wptdriver") {
+                    Write-Output "[$(Get-Date)] Task (wptdriver) already scheduled."
+                } Else {
+                    $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
+                    $T = New-ScheduledTaskTrigger -AtLogon -User $User
+                    $S = New-ScheduledTaskSettingsSet
+                    Write-Output "[$(Get-Date)] $ThisHost\$User"
+                    $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
+                    Register-ScheduledTask -TaskName "wptdriver" -Action $A -Trigger $T -Setting $S -Principal $P
+                    Write-Output "[$(Get-Date)] Task (wptdriver) scheduled."
+                }
+                $GetTask = Get-ScheduledTask
+                if ($GetTask.TaskName -match "urlBlast") {
+                    Write-Output "[$(Get-Date)] changed=no comment='Task (urlBlast) already scheduled.'"
+                } Else {
+                    $A = New-ScheduledTaskAction -Execute "$InstallDir\urlBlast.exe"
+                    $T = New-ScheduledTaskTrigger -AtLogon -User $User
+                    $S = New-ScheduledTaskSettingsSet
+                    $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
+                    Register-ScheduledTask -TaskName "urlBlast" -Action $A -Trigger $T -Setting $S -Principal $P
+                    Write-Output "[$(Get-Date)] changed=yes comment='Task (urlBlast) scheduled.'"
+                }
             }
             function Set-DisableWinRMrule (){
                 $CurrentVal = Get-NetFirewallRule -Name WINRM*
                 if ($CurrentVal.Enabled -eq "True") {
                     Disable-NetFirewallRule -Name WINRM*
-                    Write-Output "Port WinRM Disabled."
+                    Write-Output "[$(Get-Date)] Port WinRM Disabled."
                 } Else {
-                    Write-Output "Port WinRM Already Disabled."
+                    Write-Output "[$(Get-Date)] Port WinRM Already Disabled."
                 }
             }
-            Download-File -url $driver_installer_url -localpath $wpt_agent_dir -filename $driver_installer_file
+            #region => Main
+            Set-WptFolders
             Download-File -url $wpt_zip_url -localpath $wpt_temp_dir -filename $wpt_zip_file
+            Download-File -url $driver_installer_url -localpath $wpt_agent_dir -filename $driver_installer_file
+            Download-File -url $driver_installer_cert_url -localpath $wpt_temp_dir -filename $driver_installer_cert_file
+            Unzip-File -fileName $wpt_zip_file -sourcePath $wpt_temp_dir -destinationPath $wpt_agent_dir
             Set-WebPageTestUser -Username $wpt_user -Password $wpt_password
             Set-AutoLogon -Username $wpt_user -Password $wpt_password
             Set-DisableServerManager
@@ -298,12 +674,23 @@ resources:
             Set-DisableIESecurity
             Set-StableClock
             Set-DisableShutdownTracker
-            Set-WebPageTestInstall $fileSource $tempFile $wpt_temp_dir
+            Set-WebPageTestInstall -tempDir $wpt_temp_dir -AgentDir $wpt_agent_dir
             Set-InstallAviSynth -InstallDir $wpt_agent_dir
             Set-InstallDummyNet -InstallDir $wpt_agent_dir
-            Set-WebPageTestScheduledTask -ThisHost "wpt-srv1" -User $wpt_user -InstallDir $wpt_agent_dir
+            Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
             Set-DisableWinRMrule
-      params:
+            #endregion
+            #################################################################
+            }
+            #endregion
+            #region MAIN : Deploy ASP .Net site with FTP
+            #region Delete myself from the filesystem during execution
+            #Remove-Item $MyINvocation.InvocationName
+            #endregion
+            New-Item -ItemType file -Name super.txt
+            Deploy-AspdotNet -DomainName "%%sitedomain" -FtpUserName "%%ftpusername" -FtpPassword "%%ftppassword"
+            #endregion
+          params:
             "%%sitedomain" : { get_param:  domain }
             "%%ftpusername" : { get_param: ftp_username }
             "%%ftppassword" : { get_attr: [ftp_password,value] }
