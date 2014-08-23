@@ -28,7 +28,7 @@ parameters:
     label: Server Hostname
     description: Hostname to use for the server that's built.
     type: string
-    default: ASPdotNet
+    default: webpagetest
     description: Windows Server Name
 
   image:
