@@ -452,12 +452,12 @@ resources:
             function Set-WptFolders(){
                 $wpt_folders = @($wpt_agent_dir,$wpt_www_dir,$wpt_temp_dir)
                 foreach ($wpt_folder in $wpt_folders){
-                    New-Item $wpt_folder -type directory -Force
+                    New-Item $wpt_folder -type directory -Force > $null
                 }
             }
             function Download-File ($url, $localpath, $filename){
                 if(!(Test-Path -Path $localpath)){
-                    New-Item $localpath -type directory -WhatIf
+                    New-Item $localpath -type directory > $null
                 }
                 $webclient = New-Object System.Net.WebClient;
                 $webclient.DownloadFile($url, $localpath + "\" + $filename)
@@ -633,21 +633,20 @@ resources:
                     $A = New-ScheduledTaskAction -Execute "$InstallDir\wptdriver.exe"
                     $T = New-ScheduledTaskTrigger -AtLogon -User $User
                     $S = New-ScheduledTaskSettingsSet
-                    Write-Output "[$(Get-Date)] $ThisHost\$User"
                     $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
                     Register-ScheduledTask -TaskName "wptdriver" -Action $A -Trigger $T -Setting $S -Principal $P
                     Write-Output "[$(Get-Date)] Task (wptdriver) scheduled."
                 }
                 $GetTask = Get-ScheduledTask
                 if ($GetTask.TaskName -match "urlBlast") {
-                    Write-Output "[$(Get-Date)] changed=no comment='Task (urlBlast) already scheduled.'"
+                    Write-Output "[$(Get-Date)] Task (urlBlast) already scheduled."
                 } Else {
                     $A = New-ScheduledTaskAction -Execute "$InstallDir\urlBlast.exe"
                     $T = New-ScheduledTaskTrigger -AtLogon -User $User
                     $S = New-ScheduledTaskSettingsSet
                     $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
                     Register-ScheduledTask -TaskName "urlBlast" -Action $A -Trigger $T -Setting $S -Principal $P
-                    Write-Output "[$(Get-Date)] changed=yes comment='Task (urlBlast) scheduled.'"
+                    Write-Output "[$(Get-Date)] Task (urlBlast) scheduled."
                 }
             }
             function Set-DisableWinRMrule (){
