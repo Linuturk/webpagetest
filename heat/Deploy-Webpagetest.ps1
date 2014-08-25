@@ -583,7 +583,7 @@ Set-ClosePort445
 #--------
 $wpi_msi_url = "http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
 
-$wpi_msi_file = "wpifile.msi"
+$wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
 
 function Install-MSI ($MsiPath, $MsiFile){
     $BuildArgs = @{
