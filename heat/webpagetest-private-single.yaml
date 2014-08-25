@@ -649,13 +649,13 @@ resources:
                     Write-Output "[$(Get-Date)] Task (urlBlast) scheduled."
                 }
             }
-            function Set-DisableWinRMrule (){
-                $CurrentVal = Get-NetFirewallRule -Name WINRM*
+            function Set-ClosePort445 (){
+                $CurrentVal = Get-NetFirewallRule -Name "PSexec Port"
                 if ($CurrentVal.Enabled -eq "True") {
-                    Disable-NetFirewallRule -Name WINRM*
-                    Write-Output "[$(Get-Date)] Port WinRM Disabled."
+                    Disable-NetFirewallRule -Name "PSexec Port"
+                    Write-Output "[$(Get-Date)] Port PSexec Port Disabled."
                 } Else {
-                    Write-Output "[$(Get-Date)] Port WinRM Already Disabled."
+                    Write-Output "[$(Get-Date)] Port PSexec Port Already Disabled."
                 }
             }
             #region => Main
@@ -677,7 +677,7 @@ resources:
             Set-InstallAviSynth -InstallDir $wpt_agent_dir
             Set-InstallDummyNet -InstallDir $wpt_agent_dir
             Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
-            Set-DisableWinRMrule
+            Set-ClosePort445
             #endregion
             #################################################################
             }
