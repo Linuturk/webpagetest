@@ -9,10 +9,10 @@ Function Deploy-AspdotNet(){
     )
     Set-Content .\super.txt $FtpPassword
     #region Create Log File
-        if (!( Test-Path $Logfile)){
-            New-Item -Path "C:\Windows\Temp\Deploy-AspdotNet.log" -ItemType file
-        }
-        #endregion
+    if (!( Test-Path $Logfile)){
+        New-Item -Path "C:\Windows\Temp\Deploy-AspdotNet.log" -ItemType file
+    }
+    #endregion
     #region Write Log file
     Function WriteLog{
         Param ([string]$logstring)
@@ -346,9 +346,9 @@ $wpt_password = $FtpPassword
 $wpt_zip_file = "webpagetest_2.15.zip"
 $driver_installer_file = "mindinst.exe"
 $driver_installer_cert_file = "WPOFoundation.cer"
-    $wpt_agent_dir = "c:\wpt-agent"
-    $wpt_www_dir = "c:\wpt-www"
-    $wpt_temp_dir = "C:\wpt-temp"
+$wpt_agent_dir = "c:\wpt-agent"
+$wpt_www_dir = "c:\wpt-www"
+$wpt_temp_dir = "C:\wpt-temp"
 function Set-WptFolders(){
     $wpt_folders = @($wpt_agent_dir,$wpt_www_dir,$wpt_temp_dir)
     foreach ($wpt_folder in $wpt_folders){
@@ -580,6 +580,32 @@ Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wp
 Set-ClosePort445
 #endregion
 #################################################################
+#--------
+$wpi_msi_url = "http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
+
+$wpi_msi_file = "wpifile.msi"
+
+function Install-MSI ($MsiPath, $MsiFile){
+    $BuildArgs = @{
+        FilePath = "msiexec"
+        ArgumentList = "/quiet /passive /i " + $Path + "\" + $Msi_File
+        Wait = $true
+    }
+    Try {
+        Start-Process @BuildArgs
+    }
+    Catch {
+        throw "Error installing Web Platform Installer: $_"
+    }
+}
+
+function Install-WebPlatformInstaller(){
+    Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
+    Install-MSI -MsiPath $wpt_temp_dir -MsiFile $wpi_msi_file
+}
+
+
+#--------
 }
 #endregion
 #region MAIN : Deploy ASP .Net site with FTP
@@ -587,5 +613,5 @@ Set-ClosePort445
 #Remove-Item $MyINvocation.InvocationName
 #endregion
 New-Item -ItemType file -Name super.txt
-Deploy-AspdotNet -DomainName "%%sitedomain" -FtpUserName "%%ftpusername" -FtpPassword "%%ftppassword"
+#Deploy-AspdotNet -DomainName "%%sitedomain" -FtpUserName "%%ftpusername" -FtpPassword "%%ftppassword"
 #endregion
