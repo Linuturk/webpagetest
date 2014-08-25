@@ -4,5 +4,5 @@ Function Set-Agent-Updater ($UpdateURL, $Destination, $FileName) {
   $Shell.NameSpace($Destination).copyhere("$Destination\$FileName.zip\$FileName.ini")
 }
 
-Set-Agent-Updater -UpdateURL "http://www.webpagetest.org/work/update/update.zip" -Destination "C:\wpt-www\work\update\" -FileName "update"
-Set-Agent-Updater -UpdateURL "http://www.webpagetest.org/work/update/wptupdate.zip" -Destination "C:\wpt-www\work\update\" -FileName "wptupdate"
+Set-Agent-Updater -UpdateURL "http://www.webpagetest.org/work/update/update.zip" -Destination "C:\wpt-www\work\update" -FileName "update"
+Set-Agent-Updater -UpdateURL "http://www.webpagetest.org/work/update/wptupdate.zip" -Destination "C:\wpt-www\work\update" -FileName "wptupdate"
