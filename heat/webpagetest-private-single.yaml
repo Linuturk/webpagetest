@@ -650,7 +650,7 @@ resources:
                 }
             }
             function Set-ScheduleDefaultUserName ($ThisHost, $User, $InstallDir) {
-              $DefaultUserNameURL = ""
+              $DefaultUserNameURL = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/Set-AutoLogon.ps1"
               Invoke-WebRequest $DefaultUserNameURL -OutFile "$InstallDir\DefaultUserName.ps1"
               $A = New-ScheduledTaskAction -Execute "PowerShell.exe -PSConsoleFile $InstallDir\DefaultUserName.ps1"
               $T = New-ScheduledTaskTrigger -AtStartup
