@@ -582,8 +582,9 @@ Set-ClosePort445
 #################################################################
 #--------
 $wpi_msi_url = "http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
-
+$apache_msi_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
 $wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
+$apache_msi_file = "httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
 
 function Install-MSI ($MsiPath, $MsiFile){
     $BuildArgs = @{
@@ -602,6 +603,11 @@ function Install-MSI ($MsiPath, $MsiFile){
 function Install-WebPlatformInstaller(){
     Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
     Install-MSI -MsiPath $wpt_temp_dir -MsiFile $wpi_msi_file
+}
+
+function Install-Apache ($ApachePath, $ApacheFile){
+    Download-File -url $apache_msi_url -localpath $wpt_temp_dir -filename $apache_msi_file
+    Install-MSI -ApachePath $wpt_temp_dir -Apache_File $apache_msi_file
 }
 
 
