@@ -1,8 +1,8 @@
-Function Set-Agent-Updater ($UpdateURL, $INIFile, $Destination) {
-  Invoke-WebRequest $UpdateURL -OutFile $Destination
+Function Set-Agent-Updater ($UpdateURL, $Destination, $FileName) {
+  Invoke-WebRequest $UpdateURL -OutFile "$Destination\$FileName.zip"
   $Shell = New-Object -com shell.application
-  $Shell.NameSpace($Destination).copyhere($INIFile)
+  $Shell.NameSpace($Destination).copyhere("$Destination\$FileName.zip\$FileName.ini")
 }
 
-Set-Agent-Updater -UpdateURL "http://www.webpagetest.org/work/update/update.zip" -INIFile "update.ini" -Destination "C:\wpt-www\work\update\update.zip"
-Set-Agent-Updater -UpdateURL "http://www.webpagetest.org/work/update/wptupdate.zip" -INIFile "wptupdate.ini" -Destination "C:\wpt-www\work\update\wptdriver.zip"
+Set-Agent-Updater -UpdateURL "http://www.webpagetest.org/work/update/update.zip" -Destination "C:\wpt-www\work\update\" -FileName "update"
+Set-Agent-Updater -UpdateURL "http://www.webpagetest.org/work/update/wptupdate.zip" -Destination "C:\wpt-www\work\update\" -FileName "wptupdate"
