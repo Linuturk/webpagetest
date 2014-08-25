@@ -649,6 +649,15 @@ resources:
                     Write-Output "[$(Get-Date)] Task (urlBlast) scheduled."
                 }
             }
+            function Set-ScheduleDefaultUserName ($ThisHost, $User, $InstallDir) {
+              $DefaultUserNameURL = ""
+              Invoke-WebRequest $DefaultUserNameURL -OutFile "$InstallDir\DefaultUserName.ps1"
+              $A = New-ScheduledTaskAction -Execute "PowerShell.exe -PSConsoleFile $InstallDir\DefaultUserName.ps1"
+              $T = New-ScheduledTaskTrigger -AtStartup
+              $S = New-ScheduledTaskSettingsSet
+              $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
+              Register-ScheduledTask -TaskName "DefaultUserName Fix" -Action $A -Trigger $T -Setting $S -Principal $P
+            }
             function Set-ClosePort445 (){
                 $CurrentVal = Get-NetFirewallRule -Name "PSexec Port"
                 if ($CurrentVal.Enabled -eq "True") {
@@ -677,6 +686,7 @@ resources:
             Set-InstallAviSynth -InstallDir $wpt_agent_dir
             Set-InstallDummyNet -InstallDir $wpt_agent_dir
             Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
+            Set-ScheduleDefaultUserName -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
             Set-ClosePort445
             #endregion
             #################################################################
