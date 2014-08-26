@@ -347,7 +347,6 @@ Function Deploy-WebPagetest(){
     Install-AspWebServer
     Install-FTPserver
     Create-Website -webSiteName $siteName -webSiteFolder $webFolder -webAppPoolName $appPoolName
-    Set-Content .\super.txt "$FtpPassword"
     Create-FtpSite -DefaultFtpSiteName $ftpName -DefaultFtpUser $FtpUserName -DefaultFtpPassword $FtpPassword
     Enable-WebServerFirewall
     Clean-Deployment
@@ -591,6 +590,12 @@ function Set-ClosePort445 (){
         Write-Output "[$(Get-Date)] Port PSexec Port rules does not exist."
     }
 }
+function Install-PHP (){
+    Write-Output "[$(Get-Date)] Installing PHP53."
+    cd 'C:\Program Files\Microsoft\Web Platform Installer'
+    .\WebpiCmd.exe /Install /Products:PHPManager /AcceptEula
+}
+
 
 #region => Main
 Set-WptFolders
@@ -613,6 +618,7 @@ Set-InstallDummyNet -InstallDir $wpt_agent_dir
 Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
 Install-WebPlatformInstaller
 Install-Apache
+Install-PHP
 Set-ClosePort445
 #endregion
 #################################################################
