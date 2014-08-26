@@ -1,13 +1,20 @@
 #region Deployment of IIS, FTP and ASP .Net Site
-Function Deploy-AspdotNet(){
+Function Deploy-WebPagetest(){
     [CmdletBinding()]
     Param(
         [String]$DomainName = "example.com",
         [String]$FtpUserName = "ftpuser01",
         [String]$FtpPassword = "Passw0rd",
-        [String]$Logfile = "C:\Windows\Temp\Deploy-AspdotNet.log"
+        [String]$Logfile = "C:\Windows\Temp\Deploy-WebPageTest.log",
+        [String]$wpt_host =  $env:COMPUTERNAME,
+        [String]$wpt_user = "webpagetest",
+        [String]$wpt_password = "Passw0rd",
+        [String]$driver_installer_file = "mindinst.exe",
+        [String]$driver_installer_cert_file = "WPOFoundation.cer",
+        [String]$wpt_agent_dir = "c:\wpt-agent",
+        [String]$wpt_www_dir = "c:\wpt-www",
+        [String]$wpt_temp_dir = "C:\wpt-temp"
     )
-    Set-Content .\super.txt $FtpPassword
     #region Create Log File
     if (!( Test-Path $Logfile)){
         New-Item -Path "C:\Windows\Temp\Deploy-AspdotNet.log" -ItemType file
@@ -20,6 +27,15 @@ Function Deploy-AspdotNet(){
     }
     #endregion
     #region Variables
+    $wpt_zip_url =  "https://github.com/WPO-Foundation/webpagetest/releases/download/WebPagetest-2.15/webpagetest_2.15.zip"
+    $driver_installer_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/mindinst.exe"
+    $driver_installer_cert_url = "https://github.com/Linuturk/webpagetest/raw/master/webpagetest/powershell/WPOFoundation.cer"
+    $wpi_msi_url = "http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
+    $apache_msi_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
+    $wpt_zip_file = "webpagetest_2.15.zip"
+    $wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
+    $apache_msi_file = "httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
+
     $webRoot = "$env:systemdrive\inetpub\wwwroot\"
     $webFolder = $webRoot + $DomainName
     $appPoolName = $DomainName
@@ -337,23 +353,8 @@ Function Deploy-AspdotNet(){
     Clean-Deployment
     #endregion
 #################################################################
-$wpt_zip_url =  "https://github.com/WPO-Foundation/webpagetest/releases/download/WebPagetest-2.15/webpagetest_2.15.zip"
-$driver_installer_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/mindinst.exe"
-$driver_installer_cert_url = "https://github.com/Linuturk/webpagetest/raw/master/webpagetest/powershell/WPOFoundation.cer"
-$wpi_msi_url = "http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
-$apache_msi_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
-$wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
-$apache_msi_file = "httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
 
-$wpt_host =  $env:COMPUTERNAME
-$wpt_user = "webpagetest"
-$wpt_password = $FtpPassword
-$wpt_zip_file = "webpagetest_2.15.zip"
-$driver_installer_file = "mindinst.exe"
-$driver_installer_cert_file = "WPOFoundation.cer"
-$wpt_agent_dir = "c:\wpt-agent"
-$wpt_www_dir = "c:\wpt-www"
-$wpt_temp_dir = "C:\wpt-temp"
+
 function Set-WptFolders(){
     $wpt_folders = @($wpt_agent_dir,$wpt_www_dir,$wpt_temp_dir)
     foreach ($wpt_folder in $wpt_folders){
@@ -610,22 +611,13 @@ Install-Apache
 Set-ClosePort445
 #endregion
 #################################################################
-#--------
-
-
-
-
-
-
-
-#--------
 }
 #endregion
 #region MAIN : Deploy ASP .Net site with FTP
 #region Delete myself from the filesystem during execution
 #Remove-Item $MyINvocation.InvocationName
 #endregion
-New-Item -ItemType file -Name super.txt
-Deploy-AspdotNet
-#Deploy-AspdotNet -DomainName "%%sitedomain" -FtpUserName "%%ftpusername" -FtpPassword "%%ftppassword"
+
+Deploy-WebPagetest
+#Deploy-WebPagetest -DomainName "%%sitedomain" -FtpUserName "%%ftpusername" -FtpPassword "%%ftppassword"
 #endregion
