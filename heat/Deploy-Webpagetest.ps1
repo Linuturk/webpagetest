@@ -571,6 +571,7 @@ function Set-WebPageTestScheduledTask ($ThisHost, $User,$InstallDir){
     }
 }
 function Install-WebPlatformInstaller(){
+    Write-Output "[$(Get-Date)] Installing Web Platform Installer."
     Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
     Install-MSI -MsiPath $wpt_temp_dir -MsiFile $wpi_msi_file
 }
