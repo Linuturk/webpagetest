@@ -579,14 +579,17 @@ function Install-Apache (){
     Install-MSI -MsiPath $wpt_temp_dir -MsiFile $apache_msi_file
 }
 function Set-ClosePort445 (){
-    $CurrentVal = Get-NetFirewallRule -Name "PSexec Port"
-    if ($CurrentVal.Enabled -eq "True") {
+    $CurrentVal = Get-NetFirewallRule
+    if ($CurrentVal.InstanceID -match "PSexec Port" -and $CurrentVal.Enabled -eq "true") {
         Disable-NetFirewallRule -Name "PSexec Port"
         Write-Output "[$(Get-Date)] Port PSexec Port Disabled."
-    } Else {
+    } Elseif($CurrentVal.InstanceID -match "PSexec Port" -and $CurrentVal.Enabled -eq "false"){
         Write-Output "[$(Get-Date)] Port PSexec Port Already Disabled."
+    }Else {
+        Write-Output "[$(Get-Date)] Port PSexec Port rules does not exist."
     }
 }
+
 #region => Main
 Set-WptFolders
 Download-File -url $wpt_zip_url -localpath $wpt_temp_dir -filename $wpt_zip_file
