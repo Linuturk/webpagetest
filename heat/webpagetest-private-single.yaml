@@ -625,6 +625,15 @@ resources:
                     Write-Output "[$(Get-Date)] Enabled ipfw+dummynet binding on the private network adapter."
                 }
             }
+            function Set-AgentUpdaterScheduledTask ($ThisHost, $User, $InstallDir) {
+              $AgentUpdaterURL = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/Agent-Updater.ps1"
+              Invoke-WebRequest $AgentUpdaterURL -OutFile "$InstallDir\Agent-Updater.ps1"
+              $A = New-ScheduledTaskAction -Execute "PowerShell.exe -PSConsoleFile $InstallDir\Agent-Updater.ps1"
+              $T = New-ScheduledTaskTrigger -AtLogon -User $User
+              $S = New-ScheduledTaskSettingsSet
+              $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
+              Register-ScheduledTask -TaskName "WPT Agent Updater" -Action $A -Trigger $T -Setting $S -Principal $P
+            }
             function Set-WebPageTestScheduledTask ($ThisHost, $User,$InstallDir){
                 $GetTask = Get-ScheduledTask
                 if ($GetTask.TaskName -match "wptdriver") {
@@ -687,7 +696,9 @@ resources:
             Set-InstallDummyNet -InstallDir $wpt_agent_dir
             Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
             Set-ScheduleDefaultUserName -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
+            Set-AgentUpdaterScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
             Set-ClosePort445
+            Set-DisableWinRMrule
             #endregion
             #################################################################
             }
