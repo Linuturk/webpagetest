@@ -575,6 +575,7 @@ function Install-WebPlatformInstaller(){
     Install-MSI -MsiPath $wpt_temp_dir -MsiFile $wpi_msi_file
 }
 function Install-Apache (){
+    Write-Output "[$(Get-Date)] Installing Apache."
     Download-File -url $apache_msi_url -localpath $wpt_temp_dir -filename $apache_msi_file
     Install-MSI -MsiPath $wpt_temp_dir -MsiFile $apache_msi_file
 }
