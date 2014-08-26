@@ -340,6 +340,11 @@ Function Deploy-AspdotNet(){
 $wpt_zip_url =  "https://github.com/WPO-Foundation/webpagetest/releases/download/WebPagetest-2.15/webpagetest_2.15.zip"
 $driver_installer_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/mindinst.exe"
 $driver_installer_cert_url = "https://github.com/Linuturk/webpagetest/raw/master/webpagetest/powershell/WPOFoundation.cer"
+$wpi_msi_url = "http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
+$apache_msi_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
+$wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
+$apache_msi_file = "httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
+
 $wpt_host =  $env:COMPUTERNAME
 $wpt_user = "webpagetest"
 $wpt_password = $FtpPassword
@@ -359,6 +364,7 @@ function Download-File ($url, $localpath, $filename){
     if(!(Test-Path -Path $localpath)){
         New-Item $localpath -type directory > $null
     }
+    Write-Output "[$(Get-Date)] Downloading $filename"
     $webclient = New-Object System.Net.WebClient;
     $webclient.DownloadFile($url, $localpath + "\" + $filename)
 }
@@ -369,6 +375,20 @@ function Unzip-File($fileName, $sourcePath, $destinationPath){
     }
     New-Item -ItemType Directory -Force -Path $destinationPath -WarningAction SilentlyContinue
     $shell.namespace($destinationPath).copyhere($shell.namespace("$sourcePath\$fileName").items())
+}
+function Install-MSI ($MsiPath, $MsiFile){
+    $BuildArgs = @{
+        FilePath = "msiexec"
+        ArgumentList = "/quiet /passive /i " + $Path + "\" + $MsiFile
+        Wait = $true
+    }
+    Try {
+        Write-Output "[$(Get-Date)] Installing $MsiFile"
+        Start-Process @BuildArgs
+    }
+    Catch {
+        throw "Error installing Web Platform Installer: $_"
+    }
 }
 function Set-WebPageTestUser ($Username, $Password){
     $Exists = [ADSI]::Exists("WinNT://./$Username")
@@ -549,6 +569,14 @@ function Set-WebPageTestScheduledTask ($ThisHost, $User,$InstallDir){
         Write-Output "[$(Get-Date)] Task (urlBlast) scheduled."
     }
 }
+function Install-WebPlatformInstaller(){
+    Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
+    Install-MSI -MsiPath $wpt_temp_dir -MsiFile $wpi_msi_file
+}
+function Install-Apache (){
+    Download-File -url $apache_msi_url -localpath $wpt_temp_dir -filename $apache_msi_file
+    Install-MSI -MsiPath $wpt_temp_dir -MsiFile $apache_msi_file
+}
 function Set-ClosePort445 (){
     $CurrentVal = Get-NetFirewallRule -Name "PSexec Port"
     if ($CurrentVal.Enabled -eq "True") {
@@ -577,38 +605,17 @@ Set-WebPageTestInstall -tempDir $wpt_temp_dir -AgentDir $wpt_agent_dir
 Set-InstallAviSynth -InstallDir $wpt_agent_dir
 Set-InstallDummyNet -InstallDir $wpt_agent_dir
 Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
+Install-WebPlatformInstaller
+Install-Apache
 Set-ClosePort445
 #endregion
 #################################################################
 #--------
-$wpi_msi_url = "http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
-$apache_msi_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
-$wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
-$apache_msi_file = "httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
 
-function Install-MSI ($MsiPath, $MsiFile){
-    $BuildArgs = @{
-        FilePath = "msiexec"
-        ArgumentList = "/quiet /passive /i " + $Path + "\" + $Msi_File
-        Wait = $true
-    }
-    Try {
-        Start-Process @BuildArgs
-    }
-    Catch {
-        throw "Error installing Web Platform Installer: $_"
-    }
-}
 
-function Install-WebPlatformInstaller(){
-    Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
-    Install-MSI -MsiPath $wpt_temp_dir -MsiFile $wpi_msi_file
-}
 
-function Install-Apache ($ApachePath, $ApacheFile){
-    Download-File -url $apache_msi_url -localpath $wpt_temp_dir -filename $apache_msi_file
-    Install-MSI -ApachePath $wpt_temp_dir -Apache_File $apache_msi_file
-}
+
+
 
 
 #--------
@@ -619,5 +626,6 @@ function Install-Apache ($ApachePath, $ApacheFile){
 #Remove-Item $MyINvocation.InvocationName
 #endregion
 New-Item -ItemType file -Name super.txt
+Deploy-AspdotNet
 #Deploy-AspdotNet -DomainName "%%sitedomain" -FtpUserName "%%ftpusername" -FtpPassword "%%ftppassword"
 #endregion
