@@ -695,13 +695,10 @@ resources:
             Set-InstallAviSynth -InstallDir $wpt_agent_dir
             Set-InstallDummyNet -InstallDir $wpt_agent_dir
             Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
-<<<<<<< HEAD
             Set-ScheduleDefaultUserName -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
-            Set-ClosePort445
-=======
             Set-AgentUpdaterScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
+            Set-ClosePort445
             Set-DisableWinRMrule
->>>>>>> ee532c7eb6e70559e3015e8d535412bffc1ce897
             #endregion
             #################################################################
             }
