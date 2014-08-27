@@ -379,7 +379,7 @@ function Unzip-File($fileName, $sourcePath, $destinationPath){
 function Install-MSI ($MsiPath, $MsiFile){
     $BuildArgs = @{
         FilePath = "msiexec"
-        ArgumentList = "/quiet /passive /i " + $Path + "\" + $MsiFile
+        ArgumentList = "/quiet /passive /i " + $MsiPath + "\" + $MsiFile
         Wait = $true
     }
     Try {
