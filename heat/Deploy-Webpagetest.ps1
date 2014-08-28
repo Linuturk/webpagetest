@@ -577,6 +577,11 @@ function Install-WebPlatformInstaller(){
     Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
     Install-MSI -MsiPath $wpt_temp_dir -MsiFile $wpi_msi_file
 }
+
+function Replace-String ($filePath, $stringToReplace, $replaceWith){
+    (get-content $filePath) | foreach-object {$_ -replace $stringToReplace, $replaceWith} | set-content $filePath
+}
+
 function Install-Apache (){
     Write-Output "[$(Get-Date)] Installing Apache."
     #Stop-Service IISADMIN
@@ -592,11 +597,22 @@ function Install-Apache (){
             & "$wpt_temp_dir\vcredist_x86.exe" /q /norestart
             Unzip-File -fileName $apache_bin_file -sourcePath $wpt_temp_dir -destinationPath $wpt_temp_dir
             Move-Item "$wpt_temp_dir\Apache24" "C:\Apache24"
-            $httpconf_path = 'C:\Apache24\conf\httpd.conf'
-            $stringToReplace = '^\#ServerName www\.example\.com\:80$'  #ServerName www.example.com:80
-            $replaceWith = '#ServerName localhost:80'
 
-            (get-content $httpconf_path) | foreach-object {$_ -replace $stringToReplace, $replaceWith} | set-content $httpconf_path
+            $httpconf_path = 'C:\Apache24\conf\httpd.conf'
+            $httpconf_old_servername = '^\#ServerName www\.example\.com\:80$'  #ServerName www.example.com:80
+            $httpconf_new_servername = '#ServerName localhost:80'
+            #(get-content $httpconf_path) | foreach-object {$_ -replace $stringToReplace, $replaceWith} | set-content $httpconf_path
+
+            $httpconf_old_documentroot = '^DocumentRoot \"c\:\/Apache24\/htdocs\"$'
+            $httpconf_new_documentroot = 'DocumentRoot "c:/wpt-www"'
+
+            $httpconf_old_directory = '^\<Directory \"c\:\/Apache24\/htdocs\"\>$'
+            $httpconf_new_directory = '<Directory "c:/wpt-www">'
+            Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_servername -replaceWith $httpconf_new_servername
+            Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_documentroot -replaceWith $httpconf_new_documentroot
+            Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_directory -replaceWith $httpconf_new_directory
+
+
 
             #Install-MSI -MsiPath $wpt_temp_dir -MsiFile $apache_msi_file
             Stop-Service -Name W3SVC
@@ -604,6 +620,8 @@ function Install-Apache (){
             Start-Service -Name Apache2.4
     }
 }
+
+
 function Set-ClosePort445 (){
     $CurrentVal = Get-NetFirewallRule
     if ($CurrentVal.InstanceID -match "PSexec Port" -and $CurrentVal.Enabled -eq "true") {
