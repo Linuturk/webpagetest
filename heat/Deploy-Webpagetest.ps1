@@ -31,10 +31,12 @@ Function Deploy-WebPagetest(){
     $driver_installer_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/mindinst.exe"
     $driver_installer_cert_url = "https://github.com/Linuturk/webpagetest/raw/master/webpagetest/powershell/WPOFoundation.cer"
     $wpi_msi_url = "http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
-    $apache_msi_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
+    $vcpp_vc11_url = "http://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe"
+    $apache_bin_url = "http://www.apachelounge.com/download/VC11/binaries/httpd-2.4.10-win32-VC11.zip"
     $wpt_zip_file = "webpagetest_2.15.zip"
     $wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
-    $apache_msi_file = "httpd-2.2.25-win32-x86-openssl-0.9.8y.msi"
+    $apache_bin_file = "httpd-2.4.10-win32-VC11.zip"
+    $vcpp_vc11_file = "vcredist_x86.exe"
 
     $webRoot = "$env:systemdrive\inetpub\wwwroot\"
     $webFolder = $webRoot + $DomainName
@@ -99,7 +101,7 @@ Function Deploy-WebPagetest(){
       New-Item $webSiteFolder -type directory -Force >$null
       Stop-Website -Name 'Default Web Site'
       New-WebAppPool $webAppPoolName > $null
-      New-Website -Name $webSiteName -Port 80 -IPAddress "*" -HostHeader $webSiteName -PhysicalPath $webSiteFolder -ApplicationPool $webAppPoolName -Force > $null
+      New-Website -Name $webSiteName -Port 8080 -IPAddress "*" -HostHeader $webSiteName -PhysicalPath $webSiteFolder -ApplicationPool $webAppPoolName -Force > $null
     }
     catch{
       throw "Error : $_"
@@ -369,6 +371,7 @@ function Download-File ($url, $localpath, $filename){
     $webclient.DownloadFile($url, $localpath + "\" + $filename)
 }
 function Unzip-File($fileName, $sourcePath, $destinationPath){
+    Write-Output "[$(Get-Date)] Unzipping $filename to $destinationPath"
     $shell = new-object -com shell.application
     if (!(Test-Path "$sourcePath\$fileName")){
         throw "$sourcePath\$fileName does not exist"
@@ -574,11 +577,51 @@ function Install-WebPlatformInstaller(){
     Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
     Install-MSI -MsiPath $wpt_temp_dir -MsiFile $wpi_msi_file
 }
+
+function Replace-String ($filePath, $stringToReplace, $replaceWith){
+    (get-content $filePath) | foreach-object {$_ -replace $stringToReplace, $replaceWith} | set-content $filePath
+}
+
 function Install-Apache (){
     Write-Output "[$(Get-Date)] Installing Apache."
-    Download-File -url $apache_msi_url -localpath $wpt_temp_dir -filename $apache_msi_file
-    Install-MSI -MsiPath $wpt_temp_dir -MsiFile $apache_msi_file
+    #Stop-Service IISADMIN
+    Stop-Service W3SVC
+    Download-File -url $vcpp_vc11_url -localpath $wpt_temp_dir -filename $vcpp_vc11_file
+    Download-File -url $apache_bin_url -localpath $wpt_temp_dir -filename $apache_bin_file
+        if ((Get-Service).Name -match "Apache2.4"){
+            Write-Output "[$(Get-Date)] Apache is already installed and the service is configured."
+        }else{
+            cd 'C:\Program Files\Microsoft\Web Platform Installer'
+
+            #& .\WebpiCmd.exe /Install /Products:Microsoft Visual C++ 2012 Redistributable package /AcceptEula
+            & "$wpt_temp_dir\vcredist_x86.exe" /q /norestart
+            Unzip-File -fileName $apache_bin_file -sourcePath $wpt_temp_dir -destinationPath $wpt_temp_dir
+            Move-Item "$wpt_temp_dir\Apache24" "C:\Apache24"
+
+            $httpconf_path = 'C:\Apache24\conf\httpd.conf'
+            $httpconf_old_servername = '^\#ServerName www\.example\.com\:80$'  #ServerName www.example.com:80
+            $httpconf_new_servername = '#ServerName localhost:80'
+            #(get-content $httpconf_path) | foreach-object {$_ -replace $stringToReplace, $replaceWith} | set-content $httpconf_path
+
+            $httpconf_old_documentroot = '^DocumentRoot \"c\:\/Apache24\/htdocs\"$'
+            $httpconf_new_documentroot = 'DocumentRoot "c:/wpt-www"'
+
+            $httpconf_old_directory = '^\<Directory \"c\:\/Apache24\/htdocs\"\>$'
+            $httpconf_new_directory = '<Directory "c:/wpt-www">'
+            Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_servername -replaceWith $httpconf_new_servername
+            Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_documentroot -replaceWith $httpconf_new_documentroot
+            Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_directory -replaceWith $httpconf_new_directory
+
+
+
+            #Install-MSI -MsiPath $wpt_temp_dir -MsiFile $apache_msi_file
+            Stop-Service -Name W3SVC
+            & C:\Apache24\bin\httpd.exe -k install
+            Start-Service -Name Apache2.4
+    }
 }
+
+
 function Set-ClosePort445 (){
     $CurrentVal = Get-NetFirewallRule
     if ($CurrentVal.InstanceID -match "PSexec Port" -and $CurrentVal.Enabled -eq "true") {
@@ -593,7 +636,7 @@ function Set-ClosePort445 (){
 function Install-PHP (){
     Write-Output "[$(Get-Date)] Installing PHP53."
     cd 'C:\Program Files\Microsoft\Web Platform Installer'
-    .\WebpiCmd.exe /Install /Products:PHPManager /AcceptEula
+    .\WebpiCmd.exe /Install /Products:PHP53 /AcceptEula
 }
 
 
@@ -624,11 +667,10 @@ Set-ClosePort445
 #################################################################
 }
 #endregion
-#region MAIN : Deploy ASP .Net site with FTP
+#region MAIN : Deploy Web Pagge Test
 #region Delete myself from the filesystem during execution
 #Remove-Item $MyINvocation.InvocationName
 #endregion
-
 Deploy-WebPagetest
 #Deploy-WebPagetest -DomainName "%%sitedomain" -FtpUserName "%%ftpusername" -FtpPassword "%%ftppassword"
 #endregion
