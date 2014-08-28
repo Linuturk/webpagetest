@@ -18,3 +18,8 @@ instructions: |
   over RDP, you have to restart the system so the auto login happens again. Otherwise,
   the tests performed with WebPageTest will have black screenshots and video. You will
   need to manage this system with the Java Console in the Control Panel.
+  #### Manual Configuration
+  There are two manual configuration steps required. Access your server via the Console option in the
+  control panel and perform these steps:
+  1. Dismiss the blue Network Device Discovery panel on the right hand side of the screen.
+  2. Open Internet Explorer, and ensure the WebPageTest Browser Add-on is enabled.
