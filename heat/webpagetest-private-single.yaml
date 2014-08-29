@@ -502,6 +502,11 @@ resources:
                 #Clean-Deployment
                 Set-ClosePort445
                 #endregion
+                Download-File -url $wpt_locations_ini -localpath "$wpt_www_dir\settings" -filename "locations.ini"
+                Download-File -url $wpt_settings_ini -localpath "$wpt_www_dir\settings" -filename "settings.ini"
+                Download-File -url $wpt_feeds_inc -localpath "$wpt_www_dir\settings" -filename "feeds.inc"
+                Download-File -url $wpt_urlBlast_ini -localpath $wpt_agent_dir -filename "urlBlast.ini"
+                Download-File -url $wpt_wptdriver_ini -localpath $wpt_agent_dir -filename "wptdriver.ini"
             }
             #endregion
 
