@@ -321,7 +321,7 @@ Function Deploy-WebPagetest(){
     write-host "[$(Get-Date)] Enabling port 443"
     netsh advfirewall firewall set rule group="Secure World Wide Web Services (HTTPS)" new enable=yes > $null
 }
-    Function Clean-Deployment{
+    function Clean-Deployment{
     #region Remove Automation initial firewall rule opener
     if((Test-Path -Path 'C:\Cloud-Automation')){
         Remove-Item -Path 'C:\Cloud-Automation' -Recurse > $null
@@ -350,6 +350,13 @@ Function Deploy-WebPagetest(){
     Register-ScheduledTask -TaskName "Clean Automation" -TaskPath \ -RunLevel Highest -Action $ST_A_Deploy_Cleaner -Trigger $ST_T_Deploy_Cleaner -Settings $ST_S_Deploy_Cleaner -User $ST_Username -Password $FtpPassword *>> $Logfile
     #endregion
 }
+    function Set-WptConfig (){
+        Copy-Item -Path C:\wpt-www\settings\feeds.inc.sample -Destination C:\wpt-www\settings\feeds.inc -Force
+        Copy-Item -Path C:\wpt-www\settings\locations.ini.sample -Destination C:\wpt-www\settings\locations.ini -Force
+        Copy-Item -Path C:\wpt-www\settings\settings.ini.sample -Destination C:\wpt-www\settings\settings.ini -Force
+        Copy-Item -Path C:\wpt-agent\urlBlast.ini.sample -Destination C:\wpt-agent\urlBlast.ini -Force
+        Copy-Item -Path C:\wpt-agent\wptdriver.ini.sample -Destination C:\wpt-agent\wptdriver.ini -Force
+    }
     function Set-ClosePort445 (){
     $CurrentVal = Get-NetFirewallRule
     if ($CurrentVal.InstanceID -match "PSexec Port" -and $CurrentVal.Enabled -eq "true") {
@@ -384,6 +391,7 @@ Function Deploy-WebPagetest(){
     Install-WebPlatformInstaller
     Install-Apache
     Install-PHP
+    Set-WptConfig
     Enable-WebServerFirewall
     #Clean-Deployment
     Set-ClosePort445
