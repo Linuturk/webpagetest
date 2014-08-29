@@ -140,6 +140,12 @@ resources:
                 $php_bin_file = "php-5.4.32-Win32-VC9-x86.zip"
                 $vcpp_vc11_file = "vcredist_x86.exe"
 
+                $wpt_locations_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/locations.ini"
+                $wpt_settings_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/settings.ini"
+                $wpt_feeds_inc = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/feeds.inc"
+                $wpt_urlBlast_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/urlBlast.ini"
+                $wpt_wptdriver_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/wptdriver.ini"
+
                 $webRoot = "$env:systemdrive\inetpub\wwwroot\"
                 $webFolder = $webRoot + $DomainName
                 $appPoolName = $DomainName
@@ -496,6 +502,11 @@ resources:
                 #Clean-Deployment
                 Set-ClosePort445
                 #endregion
+                Download-File -url $wpt_locations_ini -localpath "$wpt_www_dir\settings" -filename "locations.ini"
+                Download-File -url $wpt_settings_ini -localpath "$wpt_www_dir\settings" -filename "settings.ini"
+                Download-File -url $wpt_feeds_inc -localpath "$wpt_www_dir\settings" -filename "feeds.inc"
+                Download-File -url $wpt_urlBlast_ini -localpath $wpt_agent_dir -filename "urlBlast.ini"
+                Download-File -url $wpt_wptdriver_ini -localpath $wpt_agent_dir -filename "wptdriver.ini"
             }
             #endregion
 
