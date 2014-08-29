@@ -140,6 +140,12 @@ resources:
                 $php_bin_file = "php-5.4.32-Win32-VC9-x86.zip"
                 $vcpp_vc11_file = "vcredist_x86.exe"
 
+                $wpt_locations_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/locations.ini"
+                $wpt_settings_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/settings.ini"
+                $wpt_feeds_inc = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/feeds.inc"
+                $wpt_urlBlast_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/urlBlast.ini"
+                $wpt_wptdriver_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/wptdriver.ini"
+
                 $webRoot = "$env:systemdrive\inetpub\wwwroot\"
                 $webFolder = $webRoot + $DomainName
                 $appPoolName = $DomainName
