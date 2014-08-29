@@ -1,4 +1,4 @@
-#region Deployment of IIS, FTP and ASP .Net Site
+#region Deployment of Web Page Test
 Function Deploy-WebPagetest(){
     [CmdletBinding()]
     Param(
@@ -17,7 +17,7 @@ Function Deploy-WebPagetest(){
     )
     #region Create Log File
     if (!( Test-Path $Logfile)){
-        New-Item -Path "C:\Windows\Temp\Deploy-AspdotNet.log" -ItemType file
+        New-Item -Path "C:\Windows\Temp\Deploy-WebPageTest.log" -ItemType file
     }
     #endregion
     #region Write Log file
@@ -33,9 +33,13 @@ Function Deploy-WebPagetest(){
     $wpi_msi_url = "http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
     $vcpp_vc11_url = "http://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe"
     $apache_bin_url = "http://www.apachelounge.com/download/VC11/binaries/httpd-2.4.10-win32-VC11.zip"
+    $php_bin_url = "http://windows.php.net/downloads/releases/php-5.4.32-Win32-VC9-x86.zip"
+    $apache_conf_url = "https://gist.githubusercontent.com/hdansou/f55d1f148f8ee435e618/raw/8de1246c9922ce68d2d0ce45ac53af0d759e6ad4/httpd.conf"
+    $php_ini_url = "https://gist.githubusercontent.com/hdansou/fba02720b0b09f3d4a4d/raw/259120d5ccd1af3ac95f10a6b26121cd4ed068f5/php.ini"
     $wpt_zip_file = "webpagetest_2.15.zip"
     $wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
     $apache_bin_file = "httpd-2.4.10-win32-VC11.zip"
+    $php_bin_file = "php-5.4.32-Win32-VC9-x86.zip"
     $vcpp_vc11_file = "vcredist_x86.exe"
 
     $webRoot = "$env:systemdrive\inetpub\wwwroot\"
@@ -346,12 +350,12 @@ Function Deploy-WebPagetest(){
     }
     #endregion
     #region MAIN
-    Install-AspWebServer
-    Install-FTPserver
-    Create-Website -webSiteName $siteName -webSiteFolder $webFolder -webAppPoolName $appPoolName
-    Create-FtpSite -DefaultFtpSiteName $ftpName -DefaultFtpUser $FtpUserName -DefaultFtpPassword $FtpPassword
+    #Install-AspWebServer
+    #Install-FTPserver
+    #Create-Website -webSiteName $siteName -webSiteFolder $webFolder -webAppPoolName $appPoolName
+    #Create-FtpSite -DefaultFtpSiteName $ftpName -DefaultFtpUser $FtpUserName -DefaultFtpPassword $FtpPassword
     Enable-WebServerFirewall
-    Clean-Deployment
+    #Clean-Deployment
     #endregion
 #################################################################
 
@@ -584,43 +588,51 @@ function Replace-String ($filePath, $stringToReplace, $replaceWith){
 
 function Install-Apache (){
     Write-Output "[$(Get-Date)] Installing Apache."
-    #Stop-Service IISADMIN
-    Stop-Service W3SVC
+    #Stop-Service W3SVC
     Download-File -url $vcpp_vc11_url -localpath $wpt_temp_dir -filename $vcpp_vc11_file
     Download-File -url $apache_bin_url -localpath $wpt_temp_dir -filename $apache_bin_file
-        if ((Get-Service).Name -match "Apache2.4"){
-            Write-Output "[$(Get-Date)] Apache is already installed and the service is configured."
-        }else{
-            cd 'C:\Program Files\Microsoft\Web Platform Installer'
+    if ((Get-Service).Name -match "W3SVC"){
+        Write-Output "[$(Get-Date)] IIS is present on this Server. Stoping and Disabling the service"
+        Set-Service -Name W3SVC -StartupType Manual
+        Stop-Service -Name W3SVC -Force
+        Stop-Service -Name IISADMIN -Force
+    }else{
+        Write-Output "[$(Get-Date)] IIS is not present on this Server."
+    }
 
-            #& .\WebpiCmd.exe /Install /Products:Microsoft Visual C++ 2012 Redistributable package /AcceptEula
-            & "$wpt_temp_dir\vcredist_x86.exe" /q /norestart
-            Unzip-File -fileName $apache_bin_file -sourcePath $wpt_temp_dir -destinationPath $wpt_temp_dir
-            Move-Item "$wpt_temp_dir\Apache24" "C:\Apache24"
+    if ((Get-Service).Name -match "Apache2.4"){
+        Write-Output "[$(Get-Date)] Apache is already installed and the service is configured."
+    }else{
+        & "$wpt_temp_dir\vcredist_x86.exe" /q /norestart
+        Unzip-File -fileName $apache_bin_file -sourcePath $wpt_temp_dir -destinationPath $wpt_temp_dir
+        Move-Item "$wpt_temp_dir\Apache24" "C:\Apache24" -Force
 
-            $httpconf_path = 'C:\Apache24\conf\httpd.conf'
-            $httpconf_old_servername = '^\#ServerName www\.example\.com\:80$'  #ServerName www.example.com:80
-            $httpconf_new_servername = '#ServerName localhost:80'
-            #(get-content $httpconf_path) | foreach-object {$_ -replace $stringToReplace, $replaceWith} | set-content $httpconf_path
+        $DomainName = "localhost"
 
-            $httpconf_old_documentroot = '^DocumentRoot \"c\:\/Apache24\/htdocs\"$'
-            $httpconf_new_documentroot = 'DocumentRoot "c:/wpt-www"'
+        $httpconf_path = 'C:\Apache24\conf\httpd.conf'
+        $httpconf_old_servername = '^\#ServerName www\.example\.com\:80$'
+        $httpconf_new_servername = "ServerName $($DomainName):80"
+        Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_servername -replaceWith $httpconf_new_servername
 
-            $httpconf_old_directory = '^\<Directory \"c\:\/Apache24\/htdocs\"\>$'
-            $httpconf_new_directory = '<Directory "c:/wpt-www">'
-            Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_servername -replaceWith $httpconf_new_servername
-            Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_documentroot -replaceWith $httpconf_new_documentroot
-            Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_directory -replaceWith $httpconf_new_directory
+        psEdit C:\Apache24\conf\httpd.conf
 
-
-
-            #Install-MSI -MsiPath $wpt_temp_dir -MsiFile $apache_msi_file
-            Stop-Service -Name W3SVC
-            & C:\Apache24\bin\httpd.exe -k install
-            Start-Service -Name Apache2.4
+        #Stop-Service -Name W3SVC
+        Write-Host "Check me out" -ForegroundColor DarkGreen
+        & C:\Apache24\bin\httpd.exe -k install *> $null
+        Start-Service -Name Apache2.4
     }
 }
 
+function Install-PHP (){
+    Write-Output "[$(Get-Date)] Installing PHP53."
+    Download-File -url $php_bin_url -localpath $wpt_temp_dir -filename $php_bin_file
+    Unzip-File -fileName $php_bin_file -sourcePath $wpt_temp_dir -destinationPath c:\php
+    Download-File -url $php_ini_url -localpath $wpt_temp_dir -filename "php.ini"
+    Copy-Item -Path $wpt_temp_dir\php.ini -Destination C:\php\ -Force
+    Download-File -url $apache_conf_url -localpath $wpt_temp_dir -filename "httpd.conf"
+    Copy-Item -Path C:\wpt-temp\httpd.conf -Destination C:\Apache24\conf\httpd.conf -Force
+    Restart-Service -Name Apache2.4
+}
 
 function Set-ClosePort445 (){
     $CurrentVal = Get-NetFirewallRule
@@ -632,11 +644,6 @@ function Set-ClosePort445 (){
     }Else {
         Write-Output "[$(Get-Date)] Port PSexec Port rules does not exist."
     }
-}
-function Install-PHP (){
-    Write-Output "[$(Get-Date)] Installing PHP53."
-    cd 'C:\Program Files\Microsoft\Web Platform Installer'
-    .\WebpiCmd.exe /Install /Products:PHP53 /AcceptEula
 }
 
 
