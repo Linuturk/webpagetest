@@ -71,10 +71,10 @@ parameters:
   wpt_username:
     label: WebPageTest Username
     description: |
-      FTP Username for the site. A password will be randomly generated for this
+      WPT Username for the site. A password will be randomly generated for this
       account.
     type: string
-    default: "wptuser"
+    default: "webpagetest"
     constraints:
     - allowed_pattern: "^(?!^root$)([a-z0-9_]{1,16})$"
       description: Must be a valid username
@@ -98,7 +98,7 @@ resources:
                     [String]$DomainName = "localhost",
                     [String]$Logfile = "C:\Windows\Temp\Deploy-WebPageTest.log",
                     [String]$wpt_host =  $env:COMPUTERNAME,
-                    [String]$wpt_user = "webpagetest",
+                    [String]$wpt_user = "%wptusername%",
                     [String]$wpt_password = "Passw0rd",
                     [String]$driver_installer_file = "mindinst.exe",
                     [String]$driver_installer_cert_file = "WPOFoundation.cer",
