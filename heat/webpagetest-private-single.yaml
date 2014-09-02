@@ -528,6 +528,7 @@ resources:
             Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
 
+            Restart-Computer
 
           params:
             "%wptdomain%" : { get_param: domain }
