@@ -1,5 +1,5 @@
 $LogonPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
-$Username = "webpagetest"
+$Username = "%%USERNAME%%"
 
 Start-Sleep -s 30
 
