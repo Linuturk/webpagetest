@@ -544,7 +544,7 @@ outputs:
     description: Web Page Test Domain name
     value: { get_param: domain }
 
-  site_ftp_user:
+  site_wpt_user:
     description: WPT User
     value: { get_param: wpt_username }
 
