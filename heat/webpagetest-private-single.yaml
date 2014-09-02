@@ -508,14 +508,14 @@ resources:
             #Remove-Item $MyINvocation.InvocationName
 
             #Deploy-WebPagetest
-            Deploy-WebPagetest -DomainName "%%wptdomain" -wpt_user "%%wptusername" -wpt_password "%%wptpassword"
+            Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
 
 
           params:
-            "%%wptdomain" : { get_param:  domain }
-            "%%ftpusername" : { get_param: wpt_username }
-            "%%ftppassword" : { get_attr: [wpt_password,value] }
+            "%wptdomain%" : { get_param: domain }
+            "%wptusername%" : { get_param: wpt_username }
+            "%wptpassword%" : { get_attr: [wpt_password,value] }
 
   # Random password generation
   wpt_password:
