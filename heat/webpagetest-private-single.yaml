@@ -396,9 +396,6 @@ resources:
                     $httpconf_old_servername = '^\#ServerName www\.example\.com\:80$'
                     $httpconf_new_servername = "ServerName $($DomainName):80"
                     Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_servername -replaceWith $httpconf_new_servername
-
-                    #psEdit C:\Apache24\conf\httpd.conf
-
                     Write-Host "Check me out" -ForegroundColor DarkGreen
                     & C:\Apache24\bin\httpd.exe -k install *> $null
                     Start-Service -Name Apache2.4
@@ -445,7 +442,6 @@ resources:
                 $ST_A_Deploy_Cleaner = New-ScheduledTaskAction -Execute $ST_Exec -Argument $ST_Arg
                 $ST_T_Deploy_Cleaner = New-ScheduledTaskTrigger -Once -At ((Get-date).AddMinutes(2))
                 $ST_S_Deploy_Cleaner = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun -DontStopIfGoingOnBatteries -StartWhenAvailable -MultipleInstances Parallel
-                #$ST_ST_Deploy_Cleaner = New-ScheduledTask -Action $ST_A_Deploy_Cleaner -Trigger $ST_T_Deploy_Cleaner -Settings $ST_S_Deploy_Cleaner
                 Register-ScheduledTask -TaskName "Clean Automation" -TaskPath \ -RunLevel Highest -Action $ST_A_Deploy_Cleaner -Trigger $ST_T_Deploy_Cleaner -Settings $ST_S_Deploy_Cleaner -User $ST_Username -Password $FtpPassword *>> $Logfile
                 #endregion
             }
@@ -492,7 +488,6 @@ resources:
                 Install-PHP
                 Set-WptConfig
                 Enable-WebServerFirewall
-                #Clean-Deployment
                 Set-ClosePort445
                 #endregion
                 Download-File -url $wpt_locations_ini -localpath "$wpt_www_dir\settings" -filename "locations.ini"
