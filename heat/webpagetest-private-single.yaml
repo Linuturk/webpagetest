@@ -11,11 +11,10 @@ parameter_groups:
   - image
   - flavor
 
-- label: ASP .Net Application Settings
+- label: WebPageTest Application Settings
   parameters:
   - domain
   - wpt_username
-  - aspdotnet_version
 
 - label: rax-dev-params
   parameters:
@@ -59,10 +58,10 @@ parameters:
       - 30 GB Performance
       description: must be a valid Rackspace Cloud Server flavor.
 
-  # ASP .Net settings
+  # WebPageTest settings
   domain:
     label: Site Domain
-    description: Domain to be used with the ASP .net site
+    description: Domain to be used with WebPageTest
     type: string
     default: "example.com"
     constraints:
@@ -70,21 +69,15 @@ parameters:
       description: Must be a valid domain name
 
   wpt_username:
-    label: FTP Username
+    label: WebPageTest Username
     description: |
       FTP Username for the site. A password will be randomly generated for this
       account.
     type: string
-    default: "ftp_user"
+    default: "wptuser"
     constraints:
     - allowed_pattern: "^(?!^root$)([a-z0-9_]{1,16})$"
       description: Must be a valid username
-
-  aspdotnet_version:
-    label: ASP .Net Version
-    description: Version of ASP .Net to install (4.5.1 includes 3.5 and 4.0)
-    type: string
-    default: 4.5.1
 
 resources:
 
