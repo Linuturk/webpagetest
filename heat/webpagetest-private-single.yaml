@@ -373,8 +373,10 @@ resources:
                     $A = New-ScheduledTaskAction -Execute "PowerShell.exe -PSConsoleFile $InstallDir\DefaultUserName.ps1"
                     $T = New-ScheduledTaskTrigger -AtStartup
                     $S = New-ScheduledTaskSettingsSet
-                    $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
-                    Register-ScheduledTask -TaskName "DefaultUserName Fix" -Action $A -Trigger $T -Setting $S -Principal $P
+                    $U = $wpt_user
+                    $P = $wpt_password
+                    $D = New-ScheduledTask -Action $A -Trigger $T -Settings $S
+                    Register-ScheduledTask -TaskName "DefaultUserName Fix" -InputObject $D -User $U -Password $P
             }
 
                 function Set-AgentUpdaterScheduledTask ($ThisHost, $User, $InstallDir) {
