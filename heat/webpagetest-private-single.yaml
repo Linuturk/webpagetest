@@ -98,7 +98,7 @@ resources:
                     [String]$DomainName = "localhost",
                     [String]$Logfile = "C:\Windows\Temp\Deploy-WebPageTest.log",
                     [String]$wpt_host =  $env:COMPUTERNAME,
-                    [String]$wpt_user = "%wptusername%",
+                    [String]$wpt_user = "webpagetest",
                     [String]$wpt_password = "Passw0rd",
                     [String]$driver_installer_file = "mindinst.exe",
                     [String]$driver_installer_cert_file = "WPOFoundation.cer",
