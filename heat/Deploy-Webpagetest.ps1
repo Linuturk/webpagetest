@@ -32,7 +32,7 @@ Function Deploy-WebPagetest(){
     $vcpp_vc11_url = "http://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe"
     $apache_bin_url = "http://www.apachelounge.com/download/VC11/binaries/httpd-2.4.10-win32-VC11.zip"
     $php_bin_url = "http://windows.php.net/downloads/releases/php-5.4.32-Win32-VC9-x86.zip"
-    $apache_conf_url = "https://gist.githubusercontent.com/hdansou/f55d1f148f8ee435e618/raw/8de1246c9922ce68d2d0ce45ac53af0d759e6ad4/httpd.conf"
+    $apache_conf_url = "https://gist.githubusercontent.com/hdansou/f55d1f148f8ee435e618/raw/8de1246c9922ce68d2d0ce45ac53af0d759e6ad4/httpd.conf" 
     $php_ini_url = "https://gist.githubusercontent.com/hdansou/fba02720b0b09f3d4a4d/raw/259120d5ccd1af3ac95f10a6b26121cd4ed068f5/php.ini"
     $wpt_zip_file = "webpagetest_2.15.zip"
     $wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
@@ -296,11 +296,12 @@ Function Deploy-WebPagetest(){
         $httpconf_path = 'C:\Apache24\conf\httpd.conf'
         $httpconf_old_servername = '^\#ServerName www\.example\.com\:80$'
         $httpconf_new_servername = "ServerName $($DomainName):80"
+        Write-Output "[$(Get-Date)] The domain name is $DomainName."
         Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_servername -replaceWith $httpconf_new_servername
-
+        
         #psEdit C:\Apache24\conf\httpd.conf
-
-        Write-Host "Check me out" -ForegroundColor DarkGreen
+   
+        #Write-Host "Check me out" -ForegroundColor DarkGreen
         & C:\Apache24\bin\httpd.exe -k install *> $null
         Start-Service -Name Apache2.4
     }
