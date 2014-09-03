@@ -132,6 +132,7 @@ resources:
                 $apache_bin_file = "httpd-2.4.10-win32-VC11.zip"
                 $php_bin_file = "php-5.4.32-Win32-VC9-x86.zip"
                 $vcpp_vc11_file = "vcredist_x86.exe"
+                $webRoot = '$env:systemdrive\inetpub\wwwroot\'
 
                 $wpt_locations_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/locations.ini"
                 $wpt_settings_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/settings.ini"
@@ -146,8 +147,6 @@ resources:
                 $ftpName = "ftp_" + $DomainName
                 $appPoolIdentity = "IIS AppPool\$appPoolName"
                 #endregion
-
-
                 function Set-WptFolders(){
                 $wpt_folders = @($wpt_agent_dir,$wpt_www_dir,$wpt_temp_dir)
                 foreach ($wpt_folder in $wpt_folders){
@@ -412,12 +411,11 @@ resources:
                     & "$wpt_temp_dir\vcredist_x86.exe" /q /norestart
                     Unzip-File -fileName $apache_bin_file -sourcePath $wpt_temp_dir -destinationPath $wpt_temp_dir
                     Move-Item "$wpt_temp_dir\Apache24" "C:\Apache24" -Force
-
                     $httpconf_path = 'C:\Apache24\conf\httpd.conf'
                     $httpconf_old_servername = '^\#ServerName www\.example\.com\:80$'
                     $httpconf_new_servername = "ServerName $($DomainName):80"
                     Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_servername -replaceWith $httpconf_new_servername
-                    Write-Host "Check me out" -ForegroundColor DarkGreen
+
                     & C:\Apache24\bin\httpd.exe -k install *> $null
                     Start-Service -Name Apache2.4
                 }
@@ -528,6 +526,7 @@ resources:
             #Deploy-WebPagetest
             Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
+
           params:
             "%wptdomain%" : { get_param: domain }
             "%wptusername%" : { get_param: wpt_username }
