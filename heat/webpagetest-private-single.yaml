@@ -11,11 +11,10 @@ parameter_groups:
   - image
   - flavor
 
-- label: ASP .Net Application Settings
+- label: WebPageTest Application Settings
   parameters:
   - domain
   - wpt_username
-  - aspdotnet_version
 
 - label: rax-dev-params
   parameters:
@@ -59,10 +58,10 @@ parameters:
       - 30 GB Performance
       description: must be a valid Rackspace Cloud Server flavor.
 
-  # ASP .Net settings
+  # WebPageTest settings
   domain:
     label: Site Domain
-    description: Domain to be used with the ASP .net site
+    description: Domain to be used with WebPageTest
     type: string
     default: "example.com"
     constraints:
@@ -70,21 +69,15 @@ parameters:
       description: Must be a valid domain name
 
   wpt_username:
-    label: FTP Username
+    label: WebPageTest Username
     description: |
-      FTP Username for the site. A password will be randomly generated for this
+      WPT Username for the site. A password will be randomly generated for this
       account.
     type: string
-    default: "ftp_user"
+    default: "webpagetest"
     constraints:
     - allowed_pattern: "^(?!^root$)([a-z0-9_]{1,16})$"
       description: Must be a valid username
-
-  aspdotnet_version:
-    label: ASP .Net Version
-    description: Version of ASP .Net to install (4.5.1 includes 3.5 and 4.0)
-    type: string
-    default: 4.5.1
 
 resources:
 
@@ -105,7 +98,7 @@ resources:
                     [String]$DomainName = "localhost",
                     [String]$Logfile = "C:\Windows\Temp\Deploy-WebPageTest.log",
                     [String]$wpt_host =  $env:COMPUTERNAME,
-                    [String]$wpt_user = "webpagetest",
+                    [String]$wpt_user = "%wptusername%",
                     [String]$wpt_password = "Passw0rd",
                     [String]$driver_installer_file = "mindinst.exe",
                     [String]$driver_installer_cert_file = "WPOFoundation.cer",
@@ -375,6 +368,27 @@ resources:
                     Write-Output "[$(Get-Date)] Task (urlBlast) scheduled."
                 }
             }
+                function Set-ScheduleDefaultUserName ($ThisHost, $User, $InstallDir) {
+                    $DefaultUserNameURL = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/Set-AutoLogon.ps1"
+                    Invoke-WebRequest $DefaultUserNameURL -OutFile "$InstallDir\DefaultUserName.ps1"
+                    Replace-String -filePath "$InstallDir\DefaultUserName.ps1" -stringToReplace "%%USERNAME%%" -replaceWith $wpt_user
+                    $A = New-ScheduledTaskAction -Execute "PowerShell.exe -PSConsoleFile $InstallDir\DefaultUserName.ps1"
+                    $T = New-ScheduledTaskTrigger -AtStartup
+                    $S = New-ScheduledTaskSettingsSet
+                    $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
+                    Register-ScheduledTask -TaskName "DefaultUserName Fix" -Action $A -Trigger $T -Setting $S -Principal $P
+            }
+
+                function Set-AgentUpdaterScheduledTask ($ThisHost, $User, $InstallDir) {
+                  $AgentUpdaterURL = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/Agent-Updater.ps1"
+                  Invoke-WebRequest $AgentUpdaterURL -OutFile "$InstallDir\Agent-Updater.ps1"
+                  $A = New-ScheduledTaskAction -Execute "PowerShell.exe -PSConsoleFile $InstallDir\Agent-Updater.ps1"
+                  $T = New-ScheduledTaskTrigger -AtLogon -User $User
+                  $S = New-ScheduledTaskSettingsSet
+                  $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
+                  Register-ScheduledTask -TaskName "WPT Agent Updater" -Action $A -Trigger $T -Setting $S -Principal $P
+            }
+
                 function Install-WebPlatformInstaller(){
                 Write-Output "[$(Get-Date)] Installing Web Platform Installer."
                 Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
@@ -405,9 +419,6 @@ resources:
                     $httpconf_new_servername = "ServerName $($DomainName):80"
                     Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_servername -replaceWith $httpconf_new_servername
 
-                    #psEdit C:\Apache24\conf\httpd.conf
-
-                    #Write-Host "Check me out" -ForegroundColor DarkGreen
                     & C:\Apache24\bin\httpd.exe -k install *> $null
                     Start-Service -Name Apache2.4
                 }
@@ -453,7 +464,6 @@ resources:
                 $ST_A_Deploy_Cleaner = New-ScheduledTaskAction -Execute $ST_Exec -Argument $ST_Arg
                 $ST_T_Deploy_Cleaner = New-ScheduledTaskTrigger -Once -At ((Get-date).AddMinutes(2))
                 $ST_S_Deploy_Cleaner = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun -DontStopIfGoingOnBatteries -StartWhenAvailable -MultipleInstances Parallel
-                #$ST_ST_Deploy_Cleaner = New-ScheduledTask -Action $ST_A_Deploy_Cleaner -Trigger $ST_T_Deploy_Cleaner -Settings $ST_S_Deploy_Cleaner
                 Register-ScheduledTask -TaskName "Clean Automation" -TaskPath \ -RunLevel Highest -Action $ST_A_Deploy_Cleaner -Trigger $ST_T_Deploy_Cleaner -Settings $ST_S_Deploy_Cleaner -User $ST_Username -Password $FtpPassword *>> $Logfile
                 #endregion
             }
@@ -495,12 +505,13 @@ resources:
                 Set-InstallAviSynth -InstallDir $wpt_agent_dir
                 Set-InstallDummyNet -InstallDir $wpt_agent_dir
                 Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
+                Set-ScheduleDefaultUserName -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
+                Set-AgentUpdaterScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
                 Install-WebPlatformInstaller
                 Install-Apache
                 Install-PHP
                 Set-WptConfig
                 Enable-WebServerFirewall
-                #Clean-Deployment
                 Set-ClosePort445
                 #endregion
                 Download-File -url $wpt_locations_ini -localpath "$wpt_www_dir\settings" -filename "locations.ini"
@@ -516,13 +527,13 @@ resources:
             #Remove-Item $MyINvocation.InvocationName
 
             #Deploy-WebPagetest
-            Deploy-WebPagetest -DomainName "%%wptdomain" -wpt_user "%%wptusername" -wpt_password "%%wptpassword"
+            Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
 
           params:
-            "%%wptdomain" : { get_param:  domain }
-            "%%ftpusername" : { get_param: wpt_username }
-            "%%ftppassword" : { get_attr: [wpt_password,value] }
+            "%wptdomain%" : { get_param: domain }
+            "%wptusername%" : { get_param: wpt_username }
+            "%wptpassword%" : { get_attr: [wpt_password,value] }
 
   # Random password generation
   wpt_password:
@@ -551,7 +562,7 @@ outputs:
     description: Web Page Test Domain name
     value: { get_param: domain }
 
-  site_ftp_user:
+  site_wpt_user:
     description: WPT User
     value: { get_param: wpt_username }
 
