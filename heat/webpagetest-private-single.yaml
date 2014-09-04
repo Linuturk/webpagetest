@@ -327,7 +327,7 @@ resources:
                 $dummynet = Get-NetAdapterBinding -Name public*
                 if ($dummynet.ComponentID -eq "ipfw+dummynet"){
                     If ($dummynet.Enabled ) {
-                        Write-Output "[$(Get-Date)] ipfw+dummynet binding on the public network adapter is already enabled."
+                        Write-Output "[$(Get-Date)] ipfw+dummynet binding is already enabled."
                     } Else {
                         Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet
                         Disable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet
@@ -338,8 +338,9 @@ resources:
                     Import-Certificate -FilePath C:\wpt-agent\WPOFoundation.cer -CertStoreLocation Cert:\LocalMachine\TrustedPublisher
                     cd $InstallDir
                     .\mindinst.exe C:\wpt-agent\dummynet\64bit\netipfw.inf -i -s
+                    Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet
                     Enable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet
-                    Write-Output "[$(Get-Date)] Enabled ipfw+dummynet binding on the private network adapter."
+                    Write-Output "[$(Get-Date)] Enabled ipfw+dummynet binding."
                 }
             }
                 function Set-WebPageTestScheduledTask ($ThisHost, $User,$InstallDir){
