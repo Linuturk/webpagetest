@@ -5,7 +5,7 @@ Function Deploy-WebPagetest(){
         [String]$DomainName = "localhost",
         [String]$Logfile = "C:\Windows\Temp\Deploy-WebPageTest.log",
         [String]$wpt_host =  $env:COMPUTERNAME,
-        [String]$wpt_user = "webpagetest",
+        [String]$wpt_user = "wptuser",
         [String]$wpt_password = "Passw0rd",
         [String]$driver_installer_file = "mindinst.exe",
         [String]$driver_installer_cert_file = "WPOFoundation.cer",
@@ -32,13 +32,20 @@ Function Deploy-WebPagetest(){
     $vcpp_vc11_url = "http://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe"
     $apache_bin_url = "http://www.apachelounge.com/download/VC11/binaries/httpd-2.4.10-win32-VC11.zip"
     $php_bin_url = "http://windows.php.net/downloads/releases/php-5.4.32-Win32-VC9-x86.zip"
-    $apache_conf_url = "https://gist.githubusercontent.com/hdansou/f55d1f148f8ee435e618/raw/8de1246c9922ce68d2d0ce45ac53af0d759e6ad4/httpd.conf" 
+    $apache_conf_url = "https://gist.githubusercontent.com/hdansou/f55d1f148f8ee435e618/raw/8de1246c9922ce68d2d0ce45ac53af0d759e6ad4/httpd.conf"
     $php_ini_url = "https://gist.githubusercontent.com/hdansou/fba02720b0b09f3d4a4d/raw/259120d5ccd1af3ac95f10a6b26121cd4ed068f5/php.ini"
     $wpt_zip_file = "webpagetest_2.15.zip"
     $wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
     $apache_bin_file = "httpd-2.4.10-win32-VC11.zip"
     $php_bin_file = "php-5.4.32-Win32-VC9-x86.zip"
     $vcpp_vc11_file = "vcredist_x86.exe"
+    $webRoot = '$env:systemdrive\inetpub\wwwroot\'
+
+    $wpt_locations_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/locations.ini"
+    $wpt_settings_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/settings.ini"
+    $wpt_feeds_inc = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/feeds.inc"
+    $wpt_urlBlast_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/urlBlast.ini"
+    $wpt_wptdriver_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/wptdriver.ini"
 
     $webRoot = "$env:systemdrive\inetpub\wwwroot\"
     $webFolder = $webRoot + $DomainName
@@ -47,8 +54,6 @@ Function Deploy-WebPagetest(){
     $ftpName = "ftp_" + $DomainName
     $appPoolIdentity = "IIS AppPool\$appPoolName"
     #endregion
-
-
     function Set-WptFolders(){
     $wpt_folders = @($wpt_agent_dir,$wpt_www_dir,$wpt_temp_dir)
     foreach ($wpt_folder in $wpt_folders){
@@ -229,7 +234,7 @@ Function Deploy-WebPagetest(){
     $dummynet = Get-NetAdapterBinding -Name public*
     if ($dummynet.ComponentID -eq "ipfw+dummynet"){
         If ($dummynet.Enabled ) {
-            Write-Output "[$(Get-Date)] ipfw+dummynet binding on the public network adapter is already enabled."
+            Write-Output "[$(Get-Date)] ipfw+dummynet binding is already enabled."
         } Else {
             Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet
             Disable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet
@@ -240,8 +245,9 @@ Function Deploy-WebPagetest(){
         Import-Certificate -FilePath C:\wpt-agent\WPOFoundation.cer -CertStoreLocation Cert:\LocalMachine\TrustedPublisher
         cd $InstallDir
         .\mindinst.exe C:\wpt-agent\dummynet\64bit\netipfw.inf -i -s
+        Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet
         Enable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet
-        Write-Output "[$(Get-Date)] Enabled ipfw+dummynet binding on the private network adapter."
+        Write-Output "[$(Get-Date)] Enabled ipfw+dummynet binding."
     }
 }
     function Set-WebPageTestScheduledTask ($ThisHost, $User,$InstallDir){
@@ -268,6 +274,27 @@ Function Deploy-WebPagetest(){
         Write-Output "[$(Get-Date)] Task (urlBlast) scheduled."
     }
 }
+    function Set-ScheduleDefaultUserName ($ThisHost, $User, $Password, $InstallDir) {
+        $DefaultUserNameURL = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/Set-AutoLogon.ps1"
+        Invoke-WebRequest $DefaultUserNameURL -OutFile "$InstallDir\DefaultUserName.ps1"
+        Replace-String -filePath "$InstallDir\DefaultUserName.ps1" -stringToReplace "%%USERNAME%%" -replaceWith $User
+        $A = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Bypass -File $InstallDir\DefaultUserName.ps1"
+        $T = New-ScheduledTaskTrigger -AtStartup
+        $S = New-ScheduledTaskSettingsSet
+        $D = New-ScheduledTask -Action $A -Trigger $T -Settings $S
+        Register-ScheduledTask -TaskName "DefaultUserName Fix" -InputObject $D -User $User -Password $Password
+}
+
+    function Set-AgentUpdaterScheduledTask ($ThisHost, $User, $InstallDir) {
+      $AgentUpdaterURL = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/Agent-Updater.ps1"
+      Invoke-WebRequest $AgentUpdaterURL -OutFile "$InstallDir\Agent-Updater.ps1"
+      $A = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Bypass -File $InstallDir\Agent-Updater.ps1"
+      $T = New-ScheduledTaskTrigger -AtLogon -User $User
+      $S = New-ScheduledTaskSettingsSet
+      $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
+      Register-ScheduledTask -TaskName "WPT Agent Updater" -Action $A -Trigger $T -Setting $S -Principal $P
+}
+
     function Install-WebPlatformInstaller(){
     Write-Output "[$(Get-Date)] Installing Web Platform Installer."
     Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
@@ -292,16 +319,11 @@ Function Deploy-WebPagetest(){
         & "$wpt_temp_dir\vcredist_x86.exe" /q /norestart
         Unzip-File -fileName $apache_bin_file -sourcePath $wpt_temp_dir -destinationPath $wpt_temp_dir
         Move-Item "$wpt_temp_dir\Apache24" "C:\Apache24" -Force
-
         $httpconf_path = 'C:\Apache24\conf\httpd.conf'
         $httpconf_old_servername = '^\#ServerName www\.example\.com\:80$'
         $httpconf_new_servername = "ServerName $($DomainName):80"
-        Write-Output "[$(Get-Date)] The domain name is $DomainName."
         Replace-String -filePath $httpconf_path -stringToReplace $httpconf_old_servername -replaceWith $httpconf_new_servername
-        
-        #psEdit C:\Apache24\conf\httpd.conf
-   
-        #Write-Host "Check me out" -ForegroundColor DarkGreen
+
         & C:\Apache24\bin\httpd.exe -k install *> $null
         Start-Service -Name Apache2.4
     }
@@ -318,9 +340,7 @@ Function Deploy-WebPagetest(){
 }
     function Enable-WebServerFirewall(){
     write-host "[$(Get-Date)] Enabling port 80"
-    netsh advfirewall firewall set rule group="World Wide Web Services (HTTP)" new enable=yes > $null
-    write-host "[$(Get-Date)] Enabling port 443"
-    netsh advfirewall firewall set rule group="Secure World Wide Web Services (HTTPS)" new enable=yes > $null
+    netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow protocol=TCP localport=80
 }
     function Clean-Deployment{
     #region Remove Automation initial firewall rule opener
@@ -347,7 +367,6 @@ Function Deploy-WebPagetest(){
     $ST_A_Deploy_Cleaner = New-ScheduledTaskAction -Execute $ST_Exec -Argument $ST_Arg
     $ST_T_Deploy_Cleaner = New-ScheduledTaskTrigger -Once -At ((Get-date).AddMinutes(2))
     $ST_S_Deploy_Cleaner = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun -DontStopIfGoingOnBatteries -StartWhenAvailable -MultipleInstances Parallel
-    #$ST_ST_Deploy_Cleaner = New-ScheduledTask -Action $ST_A_Deploy_Cleaner -Trigger $ST_T_Deploy_Cleaner -Settings $ST_S_Deploy_Cleaner
     Register-ScheduledTask -TaskName "Clean Automation" -TaskPath \ -RunLevel Highest -Action $ST_A_Deploy_Cleaner -Trigger $ST_T_Deploy_Cleaner -Settings $ST_S_Deploy_Cleaner -User $ST_Username -Password $FtpPassword *>> $Logfile
     #endregion
 }
@@ -389,14 +408,20 @@ Function Deploy-WebPagetest(){
     Set-InstallAviSynth -InstallDir $wpt_agent_dir
     Set-InstallDummyNet -InstallDir $wpt_agent_dir
     Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
+    Set-ScheduleDefaultUserName -ThisHost $wpt_host -User $wpt_user -Password $wpt_password -InstallDir $wpt_agent_dir
+    Set-AgentUpdaterScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
     Install-WebPlatformInstaller
     Install-Apache
     Install-PHP
     Set-WptConfig
     Enable-WebServerFirewall
-    #Clean-Deployment
     Set-ClosePort445
     #endregion
+    Download-File -url $wpt_locations_ini -localpath "$wpt_www_dir\settings" -filename "locations.ini"
+    Download-File -url $wpt_settings_ini -localpath "$wpt_www_dir\settings" -filename "settings.ini"
+    Download-File -url $wpt_feeds_inc -localpath "$wpt_www_dir\settings" -filename "feeds.inc"
+    Download-File -url $wpt_urlBlast_ini -localpath $wpt_agent_dir -filename "urlBlast.ini"
+    Download-File -url $wpt_wptdriver_ini -localpath $wpt_agent_dir -filename "wptdriver.ini"
 }
 #endregion
 
@@ -404,6 +429,6 @@ Function Deploy-WebPagetest(){
 #Delete myself from the filesystem during execution
 #Remove-Item $MyINvocation.InvocationName
 
-Deploy-WebPagetest
-#Deploy-WebPagetest -DomainName "%%wptdomain" -wpt_user "%%wptusername" -wpt_password "%%wptpassword"
+#Deploy-WebPagetest
+Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
 #endregion
