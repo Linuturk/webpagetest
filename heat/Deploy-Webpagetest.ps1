@@ -33,7 +33,7 @@ Function Deploy-WebPagetest(){
     $apache_bin_url = "http://www.apachelounge.com/download/VC11/binaries/httpd-2.4.10-win32-VC11.zip"
     $php_bin_url = "http://windows.php.net/downloads/releases/php-5.4.32-Win32-VC9-x86.zip"
     $apache_conf_url = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/httpd.conf"
-    $php_ini_url = "https://gist.githubusercontent.com/hdansou/fba02720b0b09f3d4a4d/raw/259120d5ccd1af3ac95f10a6b26121cd4ed068f5/php.ini"
+    $php_ini_url = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/php.ini"
     $wpt_zip_file = "webpagetest_2.15.zip"
     $wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
     $apache_bin_file = "httpd-2.4.10-win32-VC11.zip"
