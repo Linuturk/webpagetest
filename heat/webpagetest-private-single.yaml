@@ -433,9 +433,7 @@ resources:
             }
                 function Enable-WebServerFirewall(){
                 write-host "[$(Get-Date)] Enabling port 80"
-                netsh advfirewall firewall set rule group="World Wide Web Services (HTTP)" new enable=yes > $null
-                write-host "[$(Get-Date)] Enabling port 443"
-                netsh advfirewall firewall set rule group="Secure World Wide Web Services (HTTPS)" new enable=yes > $null
+                netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow protocol=TCP localport=80
             }
                 function Clean-Deployment{
                 #region Remove Automation initial firewall rule opener
