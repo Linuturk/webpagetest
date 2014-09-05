@@ -544,8 +544,8 @@ resources:
             #Delete myself from the filesystem during execution
             #Remove-Item $MyINvocation.InvocationName
 
-            Deploy-WebPagetest
-            #Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
+            #Deploy-WebPagetest
+            Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
 
           params:
