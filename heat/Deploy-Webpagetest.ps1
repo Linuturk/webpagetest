@@ -338,6 +338,9 @@ Function Deploy-WebPagetest(){
         Copy-Item -Path $wpt_temp_dir\php.ini -Destination C:\php\ -Force
         Download-File -url $apache_conf_url -localpath $wpt_temp_dir -filename "httpd.conf"
         Copy-Item -Path C:\wpt-temp\httpd.conf -Destination C:\Apache24\conf\httpd.conf -Force
+        Download-File -url $php_apc_url -localpath $wpt_temp_dir -filename $php_apc_file
+        Unzip-File -fileName $php_apc_file -sourcePath $wpt_temp_dir -destinationPath c:\php\ext
+
         Restart-Service -Name Apache2.4
     }
     function Enable-WebServerFirewall(){
