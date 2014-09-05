@@ -34,7 +34,7 @@ Function Deploy-WebPagetest(){
     $php_bin_url = "http://windows.php.net/downloads/releases/php-5.4.32-Win32-VC9-x86.zip"
     $apache_conf_url = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/httpd.conf"
     $php_ini_url = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/php.ini"
-    $php_apc_url = "https://github.com/Linuturk/webpagetest/raw/master/heat/files/PHP-5.4.8_APC-3.1.13_x86_vc9.zip"
+    $php_apc_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/PHP-5.4.8_APC-3.1.13_x86_vc9.zip"
     $ffmeg_bin_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/ffmpeg-20140829-git-4c92047-win32-static.zip"
     $ffmeg_bin_file = "ffmpeg-20140829-git-4c92047-win32-static.zip"
     $wpt_zip_file = "webpagetest_2.15.zip"
@@ -341,7 +341,7 @@ Function Deploy-WebPagetest(){
         Download-File -url $apache_conf_url -localpath $wpt_temp_dir -filename "httpd.conf"
         Copy-Item -Path C:\wpt-temp\httpd.conf -Destination C:\Apache24\conf\httpd.conf -Force
         Download-File -url $php_apc_url -localpath $wpt_temp_dir -filename $php_apc_file
-        Unzip-File -fileName $php_apc_file -sourcePath $wpt_temp_dir -destinationPath c:\php\ext
+        Unzip-File -fileName $php_apc_file -sourcePath $wpt_temp_dir -destinationPath  C:\php\ext
 
         Restart-Service -Name Apache2.4
     }
@@ -434,6 +434,7 @@ Function Deploy-WebPagetest(){
     Install-WebPlatformInstaller
     Install-Apache
     Install-PHP
+    Install-Ffmeg
     Set-WptConfig
     Enable-WebServerFirewall
     Set-ClosePort445
@@ -450,6 +451,6 @@ Function Deploy-WebPagetest(){
 #Delete myself from the filesystem during execution
 #Remove-Item $MyINvocation.InvocationName
 
-#Deploy-WebPagetest
-Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
+Deploy-WebPagetest
+#Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
 #endregion
