@@ -35,6 +35,8 @@ Function Deploy-WebPagetest(){
     $apache_conf_url = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/httpd.conf"
     $php_ini_url = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/php.ini"
     $php_apc_url = "https://github.com/Linuturk/webpagetest/raw/master/heat/files/PHP-5.4.8_APC-3.1.13_x86_vc9.zip"
+    $ffmeg_bin_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/ffmpeg-20140829-git-4c92047-win32-static.zip"
+    $ffmeg_bin_file = "ffmpeg-20140829-git-4c92047-win32-static.zip"
     $wpt_zip_file = "webpagetest_2.15.zip"
     $wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
     $apache_bin_file = "httpd-2.4.10-win32-VC11.zip"
@@ -341,6 +343,20 @@ Function Deploy-WebPagetest(){
         Download-File -url $php_apc_url -localpath $wpt_temp_dir -filename $php_apc_file
         Unzip-File -fileName $php_apc_file -sourcePath $wpt_temp_dir -destinationPath c:\php\ext
 
+        Restart-Service -Name Apache2.4
+    }
+    function Install-Ffmeg (){
+        Write-Output "[$(Get-Date)] Installing Ffmeg."
+        Download-File -url $ffmeg_bin_url -localpath $wpt_temp_dir -filename $ffmeg_bin_file
+        Unzip-File -fileName $ffmeg_bin_file -sourcePath $wpt_temp_dir -destinationPath c:\ffmpeg
+
+        $ffmpeg_path = ";c:\ffmpeg\bin"
+        if (($env:Path).Contains($ffmpeg_path)){
+            Write-Output "ffmpeg path is already in the Env Path"
+        }else{
+            Write-Output "Adding the $ffmpeg_path to the Env Path"
+            $env:Path += $ffmpeg_path
+        }
         Restart-Service -Name Apache2.4
     }
     function Enable-WebServerFirewall(){
