@@ -339,11 +339,11 @@ resources:
                     }
                     else{
                         Write-Log "[$(Get-Date)]  $InstallDir\$driver_installer_cert_file"
-                        Import-Certificate -FilePath C:\wpt-agent\WPOFoundation.cer -CertStoreLocation Cert:\LocalMachine\TrustedPublisher *>> $Logfile
-                        cd $InstallDir
-                        .\mindinst.exe C:\wpt-agent\dummynet\64bit\netipfw.inf -i -s *>> $Logfile
-                        Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet *>> $Logfile
-                        Enable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet *>> $Logfile
+                        #Import-Certificate -FilePath C:\wpt-agent\WPOFoundation.cer -CertStoreLocation Cert:\LocalMachine\TrustedPublisher *>> $Logfile
+                        #cd $InstallDir
+                        #.\mindinst.exe C:\wpt-agent\dummynet\64bit\netipfw.inf -i -s *>> $Logfile
+                        #Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet *>> $Logfile
+                        #Enable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet *>> $Logfile
                         Write-Log "[$(Get-Date)] Enabled ipfw+dummynet binding."
                     }
                 }
