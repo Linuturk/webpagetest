@@ -533,7 +533,7 @@ resources:
                 Set-InstallDummyNet -InstallDir $wpt_agent_dir
                 Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
                 Set-ScheduleDefaultUserName -ThisHost $wpt_host -User $wpt_user -Password $wpt_password -InstallDir $wpt_agent_dir
-                Set-ScheduleDefaultUserName -ThisHost $wpt_host -User $wpt_user -Password $wpt_password -InstallDir $wpt_agent_dir
+                Set-ScheduleFirstReboot -ThisHost $wpt_host -User $wpt_user -Password $wpt_password -InstallDir $wpt_agent_dir
                 Set-AgentUpdaterScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
                 Install-WebPlatformInstaller
                 Install-Apache
