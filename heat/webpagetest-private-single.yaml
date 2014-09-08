@@ -322,15 +322,6 @@ resources:
                         bcdedit /set TESTSIGNING ON *>> $Logfile
                         Write-Log "[$(Get-Date)] Test Signing Enabled."
                     }
-                    $dummynet = Get-NetAdapterBinding -Name public*
-                    If ($dummynet.ComponentID -eq "ipfw+dummynet") {
-                        If ($dummynet.Enabled ) {
-                            Write-Log "[$(Get-Date)] ipfw+dummynet binding is already enabled."
-                        } Else {
-                            Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet *>> $Logfile
-                            Disable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet *>> $Logfile
-                        }
-                    }
                 }
                 function Set-WebPageTestScheduledTask ($ThisHost, $User,$InstallDir){
                     $GetTask = Get-ScheduledTask
