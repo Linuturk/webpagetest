@@ -559,6 +559,10 @@ resources:
             #Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
 
+            Start-Job -scriptblock {
+              Start-Sleep -s 120
+              Restart-Computer
+            }
 
           params:
             "%wptdomain%" : { get_param: domain }
