@@ -1,10 +1,10 @@
-Start-Sleep -s 30
+Start-Sleep -s 60
 
 # Reboot the first time the computer starts after the HEAT automation
-If (Test-Path C:\wpt-temp\firstreboot -pathType leaf) {
-  New-Item C:\wpt-temp\firstreboot -type file
-  Restart-Computer
-} Else {
+#If (Test-Path C:\wpt-temp\firstreboot -pathType leaf) {
+#  New-Item C:\wpt-temp\firstreboot -type file
+#  Restart-Computer
+#} Else {
   # Install DummyNET after this first reboot so testsigning is enabled
   $InstallDir = "C:\wpt-agent"
   $dummynet = Get-NetAdapterBinding -Name public*
@@ -18,4 +18,4 @@ If (Test-Path C:\wpt-temp\firstreboot -pathType leaf) {
     Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet 
     Enable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet
   }
-}
+#}
