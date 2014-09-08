@@ -1,12 +1,12 @@
-chema-version: 1.0.0
-application-family: Application Frameworks
-application-name: ASP .Net
-application-version: 4.5.1
+schema-version: 1.0.0
+application-family: Testing
+application-name: WebPageTest
+application-version: latest
 flavor: Single Windows server
 flavor-weight: 1
 reach-info:
-  icon-20x20: https://0b5294b243620310a700-e388a7f3aba385a925111b1fc6f680d4.ssl.cf2.rackcdn.com/asp-net-icon-20x20.png
-  tattoo: https://0b5294b243620310a700-e388a7f3aba385a925111b1fc6f680d4.ssl.cf2.rackcdn.com/asp-net-tattoo.png
+  icon-20x20:
+  tattoo:
 hidden_outputs:
   - admin_password
 abstract: |
@@ -21,5 +21,11 @@ instructions: |
   #### Manual Configuration
   There are two manual configuration steps required. Access your server via the Console option in the
   control panel and perform these steps:
-  1. Dismiss the blue Network Device Discovery panel on the right hand side of the screen.
-  2. Open Internet Explorer, and ensure the WebPageTest Browser Add-on is enabled.
+  1. Once fully online, issue a soft reboot to your server from the Control Panel.
+  2. The server will reboot, and then will automatically reboot again within 30 seconds.
+  3. The system will come online, and auto logon to the web page test user.
+  4. Dismiss the blue Network Device Discovery panel on the right hand side of the screen.
+  5. Open Internet Explorer, and ensure the WebPageTest Browser Add-on is enabled.
+  #### Connection Throttling
+  Currently, connection throttling is not functional. Your site tests will run using the LAN connection
+  setting.
