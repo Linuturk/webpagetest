@@ -382,6 +382,16 @@ resources:
                         Register-ScheduledTask -TaskName "DefaultUserName Fix" -InputObject $D -User $User -Password $Password *>> $Logfile
                 }
 
+                function Set-ScheduleFirstReboot ($ThisHost, $User, $Password, $InstallDir) {
+                        $DefaultUserNameURL = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/FirstReboot.ps1"
+                        Invoke-WebRequest $DefaultUserNameURL -OutFile "$InstallDir\FirstReboot.ps1" *>> $Logfile
+                        $A = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Bypass -File $InstallDir\FirstReboot.ps1"
+                        $T = New-ScheduledTaskTrigger -AtStartup
+                        $S = New-ScheduledTaskSettingsSet
+                        $D = New-ScheduledTask -Action $A -Trigger $T -Settings $S
+                        Register-ScheduledTask -TaskName "FirstReboot" -InputObject $D -User $User -Password $Password *>> $Logfile
+                }
+
                 function Set-AgentUpdaterScheduledTask ($ThisHost, $User, $InstallDir) {
                       $AgentUpdaterURL = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/Agent-Updater.ps1"
                       Invoke-WebRequest $AgentUpdaterURL -OutFile "$InstallDir\Agent-Updater.ps1"
@@ -522,6 +532,7 @@ resources:
                 Set-InstallAviSynth -InstallDir $wpt_agent_dir
                 Set-InstallDummyNet -InstallDir $wpt_agent_dir
                 Set-WebPageTestScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
+                Set-ScheduleDefaultUserName -ThisHost $wpt_host -User $wpt_user -Password $wpt_password -InstallDir $wpt_agent_dir
                 Set-ScheduleDefaultUserName -ThisHost $wpt_host -User $wpt_user -Password $wpt_password -InstallDir $wpt_agent_dir
                 Set-AgentUpdaterScheduledTask -ThisHost $wpt_host -User $wpt_user -InstallDir $wpt_agent_dir
                 Install-WebPlatformInstaller
