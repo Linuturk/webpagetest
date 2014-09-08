@@ -527,7 +527,7 @@ resources:
             }
             #endregion
             #region MAIN : Deploy Web Pagge Test
-            Deploy-WebPagetest
+            Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
           params:
             "%wptdomain%" : { get_param: domain }
