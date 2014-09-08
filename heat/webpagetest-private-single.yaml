@@ -434,7 +434,7 @@ resources:
                         Write-Log "[$(Get-Date)] ffmpeg path is already in the Env Path"
                     }else{
                         Write-Log "[$(Get-Date)] Adding the $ffmpeg_path to the Env Path"
-                        $env:Path += $ffmpeg_path
+                        setx PATH "$env:Path;$ffmpeg_path" /M
                     }
                     Restart-Service -Name Apache2.4 *>> $Logfile
                 }
