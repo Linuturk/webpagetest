@@ -29,3 +29,6 @@ instructions: |
   #### Connection Throttling
   Currently, connection throttling is not functional. Your site tests will run using the LAN connection
   setting.
+  #### Video Capture
+  If you are having trouble with video capture, make sure the Advanced Settings section is open when
+  you submit a job.
