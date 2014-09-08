@@ -144,13 +144,7 @@ resources:
                 $wpt_urlBlast_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/urlBlast.ini"
                 $wpt_wptdriver_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/wptdriver.ini"
 
-                $webRoot = "$env:systemdrive\inetpub\wwwroot\"
-                $webFolder = $webRoot + $DomainName
-                $appPoolName = $DomainName
-                $siteName = $DomainName
-                $ftpName = "ftp_" + $DomainName
-                $appPoolIdentity = "IIS AppPool\$appPoolName"
-                #endregion
+               #endregion
                 function Set-WptFolders(){
                     $wpt_folders = @($wpt_agent_dir,$wpt_www_dir,$wpt_temp_dir)
                     foreach ($wpt_folder in $wpt_folders){
@@ -329,22 +323,13 @@ resources:
                         Write-Log "[$(Get-Date)] Test Signing Enabled."
                     }
                     $dummynet = Get-NetAdapterBinding -Name public*
-                    if ($dummynet.ComponentID -eq "ipfw+dummynet"){
+                    If ($dummynet.ComponentID -eq "ipfw+dummynet") {
                         If ($dummynet.Enabled ) {
                             Write-Log "[$(Get-Date)] ipfw+dummynet binding is already enabled."
                         } Else {
                             Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet *>> $Logfile
                             Disable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet *>> $Logfile
                         }
-                    }
-                    else{
-                        Write-Log "[$(Get-Date)]  $InstallDir\$driver_installer_cert_file"
-                        #Import-Certificate -FilePath C:\wpt-agent\WPOFoundation.cer -CertStoreLocation Cert:\LocalMachine\TrustedPublisher *>> $Logfile
-                        #cd $InstallDir
-                        #.\mindinst.exe C:\wpt-agent\dummynet\64bit\netipfw.inf -i -s *>> $Logfile
-                        #Enable-NetAdapterBinding -Name public0 -DisplayName ipfw+dummynet *>> $Logfile
-                        #Enable-NetAdapterBinding -Name private0 -DisplayName ipfw+dummynet *>> $Logfile
-                        Write-Log "[$(Get-Date)] Enabled ipfw+dummynet binding."
                     }
                 }
                 function Set-WebPageTestScheduledTask ($ThisHost, $User,$InstallDir){
@@ -386,7 +371,7 @@ resources:
                         $DefaultUserNameURL = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/FirstReboot.ps1"
                         Invoke-WebRequest $DefaultUserNameURL -OutFile "$InstallDir\FirstReboot.ps1" *>> $Logfile
                         $A = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Bypass -File $InstallDir\FirstReboot.ps1"
-                        $T = New-ScheduledTaskTrigger -AtStartup
+                        $T = New-ScheduledTaskTrigger -AtLogon -User $User
                         $S = New-ScheduledTaskSettingsSet
                         $D = New-ScheduledTask -Action $A -Trigger $T -Settings $S
                         Register-ScheduledTask -TaskName "FirstReboot" -InputObject $D -User $User -Password $Password *>> $Logfile
@@ -550,20 +535,9 @@ resources:
                 Download-File -url $wpt_wptdriver_ini -localpath $wpt_agent_dir -filename "wptdriver.ini"
             }
             #endregion
-
             #region MAIN : Deploy Web Pagge Test
-            #Delete myself from the filesystem during execution
-            #Remove-Item $MyINvocation.InvocationName
-
             Deploy-WebPagetest
-            #Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
-
-            Start-Job -scriptblock {
-              Start-Sleep -s 120
-              Restart-Computer
-            }
-
           params:
             "%wptdomain%" : { get_param: domain }
             "%wptusername%" : { get_param: wpt_username }
