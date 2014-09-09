@@ -18,17 +18,18 @@ instructions: |
   over RDP, you have to restart the system so the auto login happens again. Otherwise,
   the tests performed with WebPageTest will have black screenshots and video. You will
   need to manage this system with the Java Console in the Control Panel.
+  #### Automatic Reboots
+  An automatic restart of the server will be performed 30 minutes after the system comes online.
+  Another automatic reboot will be performed once the system fails the automatic logon process.
+  Do not interupt this automatic reboot process.
   #### Manual Configuration
   There are two manual configuration steps required. Access your server via the Console option in the
   control panel and perform these steps:
-  1. Once fully online, issue a soft reboot to your server from the Control Panel.
-  2. The server will reboot, and then will automatically reboot again within 30 seconds.
-  3. The system will come online, and auto logon to the web page test user.
-  4. Dismiss the blue Network Device Discovery panel on the right hand side of the screen.
-  5. Open Internet Explorer, and ensure the WebPageTest Browser Add-on is enabled.
+  1. Dismiss the blue Network Device Discovery panel on the right hand side of the screen.
+  2. Open Internet Explorer, and ensure the WebPageTest Browser Add-on is enabled.
   #### Connection Throttling
   Currently, connection throttling is not functional. Your site tests will run using the LAN connection
   setting.
   #### Video Capture
   If you are having trouble with video capture, make sure the Advanced Settings section is open when
-  you submit a job.
+  you submit a job. Also ensure the Capture Video option is enabled.
