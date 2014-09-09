@@ -327,7 +327,6 @@ resources:
                         Write-Log "[$(Get-Date)] Test Signing Enabled."
                     }
                 }
-                # Create single scheduled task scheduler
                 function Set-WebPageTestScheduledTask ($ThisHost, $User,$InstallDir){
                     $GetTask = Get-ScheduledTask
                     if ($GetTask.TaskName -match "wptdriver") {
@@ -382,7 +381,6 @@ resources:
                       $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
                       Register-ScheduledTask -TaskName "WPT Agent Updater" -Action $A -Trigger $T -Setting $S -Principal $P *>> $Logfile
                 }
-                # end single task scheduler
                 function Install-WebPlatformInstaller(){
                     Write-Log "[$(Get-Date)] Installing Web Platform Installer."
                     Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
