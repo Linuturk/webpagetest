@@ -529,6 +529,11 @@ resources:
             #region MAIN : Deploy Web Pagge Test
             Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
+            $T = Get-Date
+            $Hour = $T.Hour
+            $Minute = $T.Minute + 3
+            $Time = "${Hour}:${Minute}"
+            schtasks /Create /SC ONCE /TN "Single Reboot" /TR "shutdown -r" /ST $Time
           params:
             "%wptdomain%" : { get_param: domain }
             "%wptusername%" : { get_param: wpt_username }
