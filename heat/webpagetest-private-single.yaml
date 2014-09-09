@@ -533,7 +533,7 @@ resources:
             $Hour = $T.Hour
             $Minute = $T.Minute + 3
             $Time = "${Hour}:${Minute}"
-            schtasks /Create /SC ONCE /TN "Single Reboot" /TR "shutdown -r" /ST $Time
+            schtasks /Create /SC ONCE /RU SYSTEM /TN "Single Reboot" /TR "shutdown -r" /ST $Time /Z
           params:
             "%wptdomain%" : { get_param: domain }
             "%wptusername%" : { get_param: wpt_username }
