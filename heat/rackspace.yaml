@@ -19,7 +19,7 @@ instructions: |
   the tests performed with WebPageTest will have black screenshots and video. You will
   need to manage this system with the Java Console in the Control Panel.
   #### Automatic Reboots
-  An automatic restart of the server will be performed 30 minutes after the system comes online.
+  An automatic restart of the server will be performed 5 minutes after the system comes online.
   Another automatic reboot will be performed once the system fails the automatic logon process.
   Do not interupt this automatic reboot process.
   #### Manual Configuration
