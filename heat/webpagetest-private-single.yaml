@@ -535,7 +535,7 @@ resources:
             #endregion
             # Schedule Reboot
             $Now = Get-Date
-            $Future = $Now.AddMinutes(20)
+            $Future = $Now.AddMinutes(5)
             $Hour = $Future.Hour
             $Minute = $Future.Minute
             $Time = "${Hour}:${Minute}"
