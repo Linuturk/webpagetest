@@ -529,16 +529,10 @@ resources:
             #region MAIN : Deploy Web Pagge Test
             Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
-            $T = Get-Date
-            $Hour = $T.Hour
-            $Minute = $T.Minute + 30
-            If ($Minute -gt 60) {
-              $Hour = $Hour + 1
-              If ($Hour -gt 23) {
-                $Hour = 0
-              }
-              $Minute = $Minute - 60
-            }
+            $Now = Get-Date
+            $Future = $Now.AddMinutes(30)
+            $Hour = $Future.Hour
+            $Minute = $Future.Minute
             $Time = "${Hour}:${Minute}"
             schtasks /Create /SC ONCE /RU SYSTEM /TN "Single Reboot" /TR "shutdown -r" /ST $Time
           params:
