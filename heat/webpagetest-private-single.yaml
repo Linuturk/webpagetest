@@ -493,7 +493,10 @@ resources:
                         Write-Log "[$(Get-Date)] Port PSexec Port rules does not exist."
                     }
                 }
-
+                function Disable-FindNetDevices(){
+                    Set-Service fdPHost -StartupType Manual
+                    Stop-Service fdPHost -force
+                }
                 #region => Main
                 Set-WptFolders
                 Download-File -url $wpt_zip_url -localpath $wpt_temp_dir -filename $wpt_zip_file
@@ -522,6 +525,7 @@ resources:
                 Install-Ffmeg
                 Set-WptConfig
                 Enable-WebServerFirewall
+                Disable-FindNetDevices
                 Set-ClosePort445
                 #endregion
             }
