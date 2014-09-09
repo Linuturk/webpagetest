@@ -327,6 +327,7 @@ resources:
                         Write-Log "[$(Get-Date)] Test Signing Enabled."
                     }
                 }
+                # Create single scheduled task scheduler
                 function Set-WebPageTestScheduledTask ($ThisHost, $User,$InstallDir){
                     $GetTask = Get-ScheduledTask
                     if ($GetTask.TaskName -match "wptdriver") {
@@ -381,7 +382,7 @@ resources:
                       $P = New-ScheduledTaskPrincipal -UserId "$ThisHost\$User" -LogonType ServiceAccount
                       Register-ScheduledTask -TaskName "WPT Agent Updater" -Action $A -Trigger $T -Setting $S -Principal $P *>> $Logfile
                 }
-
+                # end single task scheduler
                 function Install-WebPlatformInstaller(){
                     Write-Log "[$(Get-Date)] Installing Web Platform Installer."
                     Download-File -url $wpi_msi_url -localpath $wpt_temp_dir -filename $wpi_msi_file
@@ -422,7 +423,7 @@ resources:
                     Download-File -url $php_ini_url -localpath $wpt_temp_dir -filename "php.ini"
                     Copy-Item -Path $wpt_temp_dir\php.ini -Destination C:\php\ -Force *>> $Logfile
                     Download-File -url $apache_conf_url -localpath $wpt_temp_dir -filename "httpd.conf"
-                    Copy-Item -Path C:\wpt-temp\httpd.conf -Destination C:\Apache24\conf\httpd.conf -Force *>> $Logfile
+                    Copy-Item -Path $wpt_temp_dir\httpd.conf -Destination C:\Apache24\conf\httpd.conf -Force *>> $Logfile
                     Download-File -url $php_apc_url -localpath $wpt_temp_dir -filename $php_apc_file
                     Unzip-File -fileName $php_apc_file -sourcePath $wpt_temp_dir -destinationPath  C:\php\ext
 
@@ -475,11 +476,11 @@ resources:
                     #endregion
                 }
                 function Set-WptConfig (){
-                    Copy-Item -Path C:\wpt-www\settings\feeds.inc.sample -Destination C:\wpt-www\settings\feeds.inc -Force *>> $Logfile
-                    Copy-Item -Path C:\wpt-www\settings\locations.ini.sample -Destination C:\wpt-www\settings\locations.ini -Force *>> $Logfile
-                    Copy-Item -Path C:\wpt-www\settings\settings.ini.sample -Destination C:\wpt-www\settings\settings.ini -Force *>> $Logfile
-                    Copy-Item -Path C:\wpt-agent\urlBlast.ini.sample -Destination C:\wpt-agent\urlBlast.ini -Force *>> $Logfile
-                    Copy-Item -Path C:\wpt-agent\wptdriver.ini.sample -Destination C:\wpt-agent\wptdriver.ini -Force *>> $Logfile
+                    Download-File -url $wpt_locations_ini -localpath "$wpt_www_dir\settings" -filename "locations.ini"
+                    Download-File -url $wpt_settings_ini -localpath "$wpt_www_dir\settings" -filename "settings.ini"
+                    Download-File -url $wpt_feeds_inc -localpath "$wpt_www_dir\settings" -filename "feeds.inc"
+                    Download-File -url $wpt_urlBlast_ini -localpath $wpt_agent_dir -filename "urlBlast.ini"
+                    Download-File -url $wpt_wptdriver_ini -localpath $wpt_agent_dir -filename "wptdriver.ini"
                 }
                 function Set-ClosePort445 (){
                     $CurrentVal = Get-NetFirewallRule
@@ -523,11 +524,6 @@ resources:
                 Enable-WebServerFirewall
                 Set-ClosePort445
                 #endregion
-                Download-File -url $wpt_locations_ini -localpath "$wpt_www_dir\settings" -filename "locations.ini"
-                Download-File -url $wpt_settings_ini -localpath "$wpt_www_dir\settings" -filename "settings.ini"
-                Download-File -url $wpt_feeds_inc -localpath "$wpt_www_dir\settings" -filename "feeds.inc"
-                Download-File -url $wpt_urlBlast_ini -localpath $wpt_agent_dir -filename "urlBlast.ini"
-                Download-File -url $wpt_wptdriver_ini -localpath $wpt_agent_dir -filename "wptdriver.ini"
             }
             #endregion
             #region MAIN : Deploy Web Pagge Test
