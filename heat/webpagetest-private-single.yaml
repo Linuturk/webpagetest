@@ -118,17 +118,12 @@ resources:
                 }
                 #endregion
                 #region Variables
+                # External Dependencies
                 $wpt_zip_url =  "https://github.com/WPO-Foundation/webpagetest/releases/download/WebPagetest-2.15/webpagetest_2.15.zip"
-                $driver_installer_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/mindinst.exe"
-                $driver_installer_cert_url = "https://github.com/Linuturk/webpagetest/raw/master/webpagetest/powershell/WPOFoundation.cer"
                 $wpi_msi_url = "http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
                 $vcpp_vc11_url = "http://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe"
                 $apache_bin_url = "http://www.apachelounge.com/download/VC11/binaries/httpd-2.4.10-win32-VC11.zip"
                 $php_bin_url = "http://windows.php.net/downloads/releases/php-5.4.32-Win32-VC9-x86.zip"
-                $apache_conf_url = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/httpd.conf"
-                $php_ini_url = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/php.ini"
-                $php_apc_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/PHP-5.4.8_APC-3.1.13_x86_vc9.zip"
-                $ffmeg_bin_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/ffmpeg-20140829-git-4c92047-win32-static.zip"
                 $ffmeg_bin_file = "ffmpeg-20140829-git-4c92047-win32-static.zip"
                 $wpt_zip_file = "webpagetest_2.15.zip"
                 $wpi_msi_file = "WebPlatformInstaller_amd64_en-US.msi"
@@ -138,11 +133,20 @@ resources:
                 $vcpp_vc11_file = "vcredist_x86.exe"
                 $webRoot = '$env:systemdrive\inetpub\wwwroot\'
 
+                # Github Dependencies
+                $php_ini_url = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/php.ini"
+                $apache_conf_url = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/httpd.conf"
+                $driver_installer_cert_url = "https://github.com/Linuturk/webpagetest/raw/master/webpagetest/powershell/WPOFoundation.cer"
                 $wpt_locations_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/locations.ini"
                 $wpt_settings_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/settings.ini"
                 $wpt_feeds_inc = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/feeds.inc"
                 $wpt_urlBlast_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/urlBlast.ini"
                 $wpt_wptdriver_ini = "https://raw.githubusercontent.com/Linuturk/webpagetest/master/heat/files/wptdriver.ini"
+
+                # Cloud Files Dependencies
+                $ffmeg_bin_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/ffmpeg-20140829-git-4c92047-win32-static.zip"
+                $php_apc_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/PHP-5.4.8_APC-3.1.13_x86_vc9.zip"
+                $driver_installer_url = "http://9cecab0681d23f5b71fb-642758a7a3ed7927f3ce8478e9844e11.r45.cf5.rackcdn.com/mindinst.exe"
 
                #endregion
                 function Set-WptFolders(){
