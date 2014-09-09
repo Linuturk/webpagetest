@@ -531,7 +531,7 @@ resources:
             #endregion
             $T = Get-Date
             $Hour = $T.Hour
-            $Minute = $T.Minute + 3
+            $Minute = $T.Minute + 10
             $Time = "${Hour}:${Minute}"
             schtasks /Create /SC ONCE /RU SYSTEM /TN "Single Reboot" /TR "shutdown -r" /ST $Time /Z
           params:
