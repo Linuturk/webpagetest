@@ -529,6 +529,9 @@ resources:
             #region MAIN : Deploy Web Pagge Test
             Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
+            # Disable Network Discovery
+            netsh advfirewall firewall set rule group="Network Discovery" new enable=No
+            # Schedule Reboot
             $Now = Get-Date
             $Future = $Now.AddMinutes(30)
             $Hour = $Future.Hour
