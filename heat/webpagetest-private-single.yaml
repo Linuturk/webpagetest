@@ -531,7 +531,7 @@ resources:
             #endregion
             $T = Get-Date
             $Hour = $T.Hour
-            $Minute = $T.Minute + 10
+            $Minute = $T.Minute + 30
             If ($Minute -gt 60) {
               $Hour = $Hour + 1
               If ($Hour -gt 23) {
