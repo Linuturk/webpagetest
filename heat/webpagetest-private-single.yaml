@@ -76,7 +76,7 @@ parameters:
     type: string
     default: "wptuser"
     constraints:
-    - allowed_pattern: "^(?!^root$)([a-z0-9_]{1,16})$"
+    - allowed_pattern: "^(?!^Administrator$)([a-z0-9_]{1,16})$"
       description: Must be a valid username
 
 resources:
