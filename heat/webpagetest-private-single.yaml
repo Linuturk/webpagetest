@@ -533,6 +533,11 @@ resources:
             #region MAIN : Deploy Web Pagge Test
             Deploy-WebPagetest -DomainName "%wptdomain%" -wpt_user "%wptusername%" -wpt_password "%wptpassword%"
             #endregion
+            # Create Shortcut to IE
+            $WshShell = New-Object -ComObject WScript.Shell
+            $Shortcut = $WshShell.CreateShortcut("C:\Users\Public\Desktop\Internet Explorer.lnk")
+            $Shortcut.TargetPath = "C:\Program Files\Internet Explorer\iexplore.exe"
+            $Shortcut.Save()
             # Schedule Reboot
             $Now = Get-Date
             $Future = $Now.AddMinutes(5)
