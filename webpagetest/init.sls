@@ -6,7 +6,7 @@ packages:
 
 ffmpeg:
   pkgrepo.managed:
-    - ppa: jon-severinsson/ffmpeg
+    - ppa: mc3man/trusty-media
   pkg.installed:
     - name: ffmpeg
     - refresh: True
