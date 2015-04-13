@@ -4,17 +4,20 @@ close-port-445:
     - shell: powershell
     - stateful: True
 
-disable-ie-esc:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-DisableIESecurity.ps1
-    - shell: powershell
-    - stateful: True
+disable-ie-esc-admin:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled"
+    - value: 0
+
+disable-ie-esc-user:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled"
+    - value: 0
 
 disable-screensaver:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-DisableScreensaver.ps1
-    - shell: powershell
-    - stateful: True
+  reg.present:
+    - name: "HKCU:\Control Panel\Desktop\ScreenSaveActive"
+    - value: 0
 
 disable-monitor-timeout:
   cmd.script:
@@ -23,16 +26,14 @@ disable-monitor-timeout:
     - stateful: True
 
 disable-shutdown-tracker:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-DisableShutdownTracker.ps1
-    - shell: powershell
-    - stateful: True
+  reg.present:
+    - name: "HKLM:\Software\Microsoft\Windows\CurrentVersion\Reliability\ShutdownReasonUI"
+    - value: 0
 
 disable-uac:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-DisableUAC.ps1
-    - shell: powershell
-    - stateful: True
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin"
+    - value: 00000000
 
 disable-server-manager:
   cmd.script:
@@ -47,14 +48,40 @@ create-user:
     - stateful: True
     - template: jinja
 
-set-auto-logon:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-AutoLogon.ps1
-    - shell: powershell
-    - stateful: True
-    - template: jinja
-    - require:
-      - cmd: create-user
+auto-admin-logon:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon"
+    - value: 1
+
+default-domain-name:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultDomainName"
+    - value: {{ grains.host }}
+
+default-user-name:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultUserName"
+    - value: {{ salt['pillar.get']('webpagetest:win:user') }}
+
+default-password:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultPassword"
+    - value: {{ salt['pillar.get']('webpagetest:win:pass') }}
+
+dont-display-last-user:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DontDisplayLastUserName"
+    - value: 1
+
+last-used-user-name:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\LastUsedUsername"
+    - value: {{ salt['pillar.get']('webpagetest:win:user') }}
+
+last-loggedon-user:
+  reg.present:
+    - name: "HKLM:\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\LastLoggedOnUser"
+    - value: {{ salt['pillar.get']('webpagetest:win:user') }}
 
 stable-clock:
   cmd.script:
@@ -64,11 +91,11 @@ stable-clock:
 
 manage-temp-dir:
   file.directory:
-    - name: {{ pillar['webpagetest']['win']['temp_dir'] }}
+    - name: {{ salt['pillar.get']('webpagetest:win:temp_dir') }}
 
 manage-install-dir:
   file.directory:
-    - name: {{ pillar['webpagetest']['win']['install_dir'] }}
+    - name: {{ salt['pillar.get']('webpagetest:win:install_dir') }}
 
 extract-installer:
   cmd.script:
@@ -91,24 +118,24 @@ schedule-drivers:
     - template: jinja
     - stateful: True
 
-'{{ pillar['webpagetest']['win']['install_dir'] }}\agent\wptdriver.ini':
+'{{ salt['pillar.get']('webpagetest:win:install_dir') }}\agent\wptdriver.ini':
   file.managed:
     - source: salt://webpagetest/files/wptdriver.ini
     - template: jinja
 
-'{{ pillar['webpagetest']['win']['install_dir'] }}\agent\urlBlast.ini':
+'{{ salt['pillar.get']('webpagetest:win:install_dir') }}\agent\urlBlast.ini':
   file.managed:
     - source: salt://webpagetest/files/urlBlast.ini
     - template: jinja
 
 install-mindinst:
   file.managed:
-    - name: {{ pillar['webpagetest']['win']['install_dir'] }}\mindinst.exe
+    - name: {{ salt['pillar.get']('webpagetest:win:install_dir') }}\mindinst.exe
     - source: salt://webpagetest/powershell/mindinst.exe
 
 place-dummynet-cert:
   file.managed:
-    - name: {{ pillar['webpagetest']['win']['install_dir'] }}\WPOFoundation.cer
+    - name: {{ salt['pillar.get']('webpagetest:win:install_dir') }}\WPOFoundation.cer
     - source: salt://webpagetest/powershell/WPOFoundation.cer
 
 install-dummynet-binding:

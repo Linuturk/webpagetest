@@ -1,6 +1,8 @@
+{% set webpagetest = salt['pillar.get']('webpagetest') %}
+
 packages:
   pkg.installed:
-    - pkgs: {{ pillar['webpagetest']['packages'] }}
+    - pkgs: {{ webpagetest.packages }}
 
 ffmpeg:
   pkgrepo.managed:
@@ -12,18 +14,20 @@ ffmpeg:
 httpservices:
   pkg.installed:
     - pkgs:
-      - {{ pillar['webpagetest']['http'] }}
-      - {{ pillar['webpagetest']['php'] }}
+      - {{ webpagetest.http }}
+      - {{ webpagetest.php }}
 
-/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}:
+extract-webpagetest:
   archive.extracted:
-    - source: {{ pillar['webpagetest']['zipurl'] }}
-    - source_hash: {{ pillar['webpagetest']['zipsha'] }}
+    - name: /var/www/vhosts/{{ webpagetest.sitename }}
+    - source: {{ webpagetest.zipurl }}
+    - source_hash: {{ webpagetest.zipsha }}
     - archive_format: zip
-    - if_missing: /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www
+    - if_missing: /var/www/vhosts/{{ webpagetest.sitename }}/www
 
-/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www:
+correct-document-root-permissions:
   file.directory:
+    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www
     - user: www-data
     - group: www-data
     - file_mode: 644
@@ -35,8 +39,9 @@ httpservices:
     - require_in:
       - mount: mount-tmpfs
 
-/etc/cron.daily/wptupdate:
+install-wpt-cron-updater:
   file.managed:
+    - name: /etc/cron.daily/wptupdate
     - source: salt://webpagetest/files/wptupdate.cron
     - template: jinja
     - user: root
@@ -44,28 +49,31 @@ httpservices:
     - mode: 755
 
 include:
-  - webpagetest.{{ pillar['webpagetest']['http'] }}
+  - webpagetest.{{ webpagetest.http }}
 
 mount-tmpfs:
   mount.mounted:
-    - name: /var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/tmp
+    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www/tmp
     - device: tmpfs
     - fstype: tmpfs
     - mkmnt: True
     - opts:
       - size=256m
 
-/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/settings/settings.ini:
+settings-config:
   file.managed:
+    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www/settings/settings.ini:
     - source: salt://webpagetest/files/settings.ini
     - template: jinja
 
-/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/settings/locations.ini:
+locations-config:
   file.managed:
+    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www/settings/locations.ini:
     - source: salt://webpagetest/files/locations.ini
     - template: jinja
 
-/var/www/vhosts/{{ pillar['webpagetest']['sitename'] }}/www/settings/feeds.inc:
+feeds-config:
   file.managed:
+    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www/settings/feeds.inc:
     - source: salt://webpagetest/files/feeds.inc
     - template: jinja
