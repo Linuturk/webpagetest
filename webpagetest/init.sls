@@ -62,18 +62,18 @@ mount-tmpfs:
 
 settings-config:
   file.managed:
-    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www/settings/settings.ini:
+    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www/settings/settings.ini
     - source: salt://webpagetest/files/settings.ini
     - template: jinja
 
 locations-config:
   file.managed:
-    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www/settings/locations.ini:
+    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www/settings/locations.ini
     - source: salt://webpagetest/files/locations.ini
     - template: jinja
 
 feeds-config:
   file.managed:
-    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www/settings/feeds.inc:
+    - name: /var/www/vhosts/{{ webpagetest.sitename }}/www/settings/feeds.inc
     - source: salt://webpagetest/files/feeds.inc
     - template: jinja
