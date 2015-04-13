@@ -48,14 +48,40 @@ create-user:
     - stateful: True
     - template: jinja
 
-set-auto-logon:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-AutoLogon.ps1
-    - shell: powershell
-    - stateful: True
-    - template: jinja
-    - require:
-      - cmd: create-user
+auto-admin-logon:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon"
+    - value: 1
+
+default-domain-name:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultDomainName"
+    - value: {{ grains.host }}
+
+default-user-name:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultUserName"
+    - value: {{ salt['pillar.get'](webpagetest:win:user) }}
+
+default-password:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultPassword"
+    - value: {{ salt['pillar.get'](webpagetest:win:pass) }}
+
+dont-display-last-user:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DontDisplayLastUserName"
+    - value: 1
+
+last-used-user-name:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\LastUsedUsername"
+    - value: {{ salt['pillar.get'](webpagetest:win:user) }}
+
+last-loggedon-user:
+  reg.present:
+    - name: "HKLM:\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\LastLoggedOnUser"
+    - value: {{ salt['pillar.get'](webpagetest:win:user) }}
 
 stable-clock:
   cmd.script:
