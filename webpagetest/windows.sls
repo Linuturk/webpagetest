@@ -26,10 +26,9 @@ disable-monitor-timeout:
     - stateful: True
 
 disable-shutdown-tracker:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-DisableShutdownTracker.ps1
-    - shell: powershell
-    - stateful: True
+  reg.present:
+    - name: "HKLM:\Software\Microsoft\Windows\CurrentVersion\Reliability\ShutdownReasonUI"
+    - value: 0
 
 disable-uac:
   cmd.script:
