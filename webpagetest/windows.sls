@@ -61,12 +61,12 @@ default-domain-name:
 default-user-name:
   reg.present:
     - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultUserName"
-    - value: {{ salt['pillar.get'](webpagetest:win:user) }}
+    - value: {{ salt['pillar.get']('webpagetest:win:user') }}
 
 default-password:
   reg.present:
     - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultPassword"
-    - value: {{ salt['pillar.get'](webpagetest:win:pass) }}
+    - value: {{ salt['pillar.get']('webpagetest:win:pass') }}
 
 dont-display-last-user:
   reg.present:
@@ -76,12 +76,12 @@ dont-display-last-user:
 last-used-user-name:
   reg.present:
     - name: "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\LastUsedUsername"
-    - value: {{ salt['pillar.get'](webpagetest:win:user) }}
+    - value: {{ salt['pillar.get']('webpagetest:win:user') }}
 
 last-loggedon-user:
   reg.present:
     - name: "HKLM:\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\LastLoggedOnUser"
-    - value: {{ salt['pillar.get'](webpagetest:win:user) }}
+    - value: {{ salt['pillar.get']('webpagetest:win:user') }}
 
 stable-clock:
   cmd.script:
@@ -91,11 +91,11 @@ stable-clock:
 
 manage-temp-dir:
   file.directory:
-    - name: {{ pillar['webpagetest']['win']['temp_dir'] }}
+    - name: {{ salt['pillar.get']('webpagetest:win:temp_dir') }}
 
 manage-install-dir:
   file.directory:
-    - name: {{ pillar['webpagetest']['win']['install_dir'] }}
+    - name: {{ salt['pillar.get']('webpagetest:win:install_dir') }}
 
 extract-installer:
   cmd.script:
@@ -118,24 +118,24 @@ schedule-drivers:
     - template: jinja
     - stateful: True
 
-'{{ pillar['webpagetest']['win']['install_dir'] }}\agent\wptdriver.ini':
+'{{ salt['pillar.get']('webpagetest:win:install_dir') }}\agent\wptdriver.ini':
   file.managed:
     - source: salt://webpagetest/files/wptdriver.ini
     - template: jinja
 
-'{{ pillar['webpagetest']['win']['install_dir'] }}\agent\urlBlast.ini':
+'{{ salt['pillar.get']('webpagetest:win:install_dir') }}\agent\urlBlast.ini':
   file.managed:
     - source: salt://webpagetest/files/urlBlast.ini
     - template: jinja
 
 install-mindinst:
   file.managed:
-    - name: {{ pillar['webpagetest']['win']['install_dir'] }}\mindinst.exe
+    - name: {{ salt['pillar.get']('webpagetest:win:install_dir') }}\mindinst.exe
     - source: salt://webpagetest/powershell/mindinst.exe
 
 place-dummynet-cert:
   file.managed:
-    - name: {{ pillar['webpagetest']['win']['install_dir'] }}\WPOFoundation.cer
+    - name: {{ salt['pillar.get']('webpagetest:win:install_dir') }}\WPOFoundation.cer
     - source: salt://webpagetest/powershell/WPOFoundation.cer
 
 install-dummynet-binding:
