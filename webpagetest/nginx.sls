@@ -1,3 +1,5 @@
+{% set sitename = salt['pillar.get']('webpagetest:sitename') %}
+
 remove-apache2:
   pkg.removed:
     - name: apache2
@@ -7,13 +9,13 @@ remove-apache2:
     - require:
       - pkg: httpservices
 
-/etc/nginx/sites-enabled/{{ pillar['webpagetest']['sitename'] }}.conf:
+/etc/nginx/sites-enabled/{{ sitename }}.conf:
   file.symlink:
-    - target: ../sites-available/{{ pillar['webpagetest']['sitename'] }}.conf
+    - target: ../sites-available/{{ sitename }}.conf
     - require:
       - pkg: httpservices
 
-/etc/nginx/sites-available/{{ pillar['webpagetest']['sitename'] }}.conf:
+/etc/nginx/sites-available/{{ sitename }}.conf:
   file.managed:
     - source: salt://webpagetest/files/nginx.conf
     - template: jinja
@@ -22,12 +24,12 @@ remove-apache2:
   service.running:
     - name: nginx
     - watch:
-        - file: /etc/nginx/sites-available/{{ pillar['webpagetest']['sitename'] }}.conf
-        - file: /etc/nginx/include/{{ pillar['webpagetest']['sitename'] }}.include.conf
+        - file: /etc/nginx/sites-available/{{ sitename }}.conf
+        - file: /etc/nginx/include/{{ sitename }}.include.conf
     - require:
       - pkg: httpservices
 
-/etc/nginx/include/{{ pillar['webpagetest']['sitename'] }}.include.conf:
+/etc/nginx/include/{{ sitename }}.include.conf:
   file.managed:
     - source: salt://webpagetest/files/nginx.include.conf
     - template: jinja
