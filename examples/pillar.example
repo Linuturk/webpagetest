@@ -1,7 +1,7 @@
 webpagetest:
   sitename: "webpagetest.example.com"
-  zipurl: "https://github.com/WPO-Foundation/webpagetest/releases/download/WebPagetest-2.15/webpagetest_2.15.zip"
-  zipsha: "sha256=19ee9df78205f99153c6fa80b6e6e98394cc680c4a9e13b31bf4c7a9e374bad8"
+  zipurl: "https://github.com/WPO-Foundation/webpagetest/releases/download/WebPageTest-2.16/webpagetest_2.16.zip"
+  zipsha: "sha256=7fc0f8c6ca188b04d2592dd1ea9909c3d325da8db9cfa1ac1faf164315de5746"
   http: "apache2" # nginx or apache2
   php: "php5" # php5 or php5-fpm
   win:
@@ -9,7 +9,7 @@ webpagetest:
     pass: "changeme"
     install_dir: 'C:\webpagetest'
     temp_dir: 'C:\wpttemp'
-    zip_file: "webpagetest_2.15.zip"
+    zip_file: "webpagetest_2.16.zip"
   packages:
     - imagemagick
     - libimage-exiftool-perl
