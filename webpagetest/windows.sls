@@ -6,17 +6,17 @@ close-port-445:
 
 disable-ie-esc-admin:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled"
+    - name: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled'
     - value: 0
 
 disable-ie-esc-user:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled"
+    - name: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled'
     - value: 0
 
 disable-screensaver:
   reg.present:
-    - name: "HKEY_CURRENT_USER\Control Panel\Desktop\ScreenSaveActive"
+    - name: 'HKEY_CURRENT_USER\Control Panel\Desktop\ScreenSaveActive'
     - value: 0
 
 disable-monitor-timeout:
@@ -27,12 +27,12 @@ disable-monitor-timeout:
 
 disable-shutdown-tracker:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Reliability\ShutdownReasonUI"
+    - name: 'HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Reliability\ShutdownReasonUI'
     - value: 0
 
 disable-uac:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin"
+    - name: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin'
     - value: 00000000
 
 disable-server-manager:
@@ -50,37 +50,37 @@ create-user:
 
 auto-admin-logon:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon"
+    - name: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon'
     - value: 1
 
 default-domain-name:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultDomainName"
+    - name: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultDomainName'
     - value: {{ grains.host }}
 
 default-user-name:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultUserName"
+    - name: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultUserName'
     - value: {{ salt['pillar.get']('webpagetest:win:user') }}
 
 default-password:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultPassword"
+    - name: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultPassword'
     - value: {{ salt['pillar.get']('webpagetest:win:pass') }}
 
 dont-display-last-user:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DontDisplayLastUserName"
+    - name: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\DontDisplayLastUserName'
     - value: 1
 
 last-used-user-name:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\LastUsedUsername"
+    - name: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\LastUsedUsername'
     - value: {{ salt['pillar.get']('webpagetest:win:user') }}
 
 last-loggedon-user:
   reg.present:
-    - name: "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\LastLoggedOnUser"
+    - name: 'HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\LastLoggedOnUser'
     - value: {{ salt['pillar.get']('webpagetest:win:user') }}
 
 stable-clock:
