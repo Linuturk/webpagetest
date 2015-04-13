@@ -4,17 +4,20 @@ close-port-445:
     - shell: powershell
     - stateful: True
 
-disable-ie-esc:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-DisableIESecurity.ps1
-    - shell: powershell
-    - stateful: True
+disable-ie-esc-admin:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled"
+    - value: 0
+
+disable-ie-esc-user:
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled"
+    - value: 0
 
 disable-screensaver:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-DisableScreensaver.ps1
-    - shell: powershell
-    - stateful: True
+  reg.present:
+    - name: "HKCU:\Control Panel\Desktop\ScreenSaveActive"
+    - value: 0
 
 disable-monitor-timeout:
   cmd.script:
