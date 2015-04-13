@@ -6,6 +6,7 @@ $Exists = [ADSI]::Exists("WinNT://./$Username")
 if ($Exists) {
   Write-Output "changed=no comment='$Username user already exists.'"
 } Else {
+  net accounts /maxpwage:unlimited
   net user /add $Username
   net localgroup Administrators /add $Username
   $user = [ADSI]("WinNT://./$Username")
