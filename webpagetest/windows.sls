@@ -31,10 +31,9 @@ disable-shutdown-tracker:
     - value: 0
 
 disable-uac:
-  cmd.script:
-    - source: salt://webpagetest/powershell/Set-DisableUAC.ps1
-    - shell: powershell
-    - stateful: True
+  reg.present:
+    - name: "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin"
+    - value: 00000000
 
 disable-server-manager:
   cmd.script:
